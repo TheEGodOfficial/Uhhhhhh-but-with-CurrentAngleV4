@@ -7499,16 +7499,15 @@ do
 		table.clear(actionsmap)
 		ContextActions._ButtonsGui:ClearAllChildren()
 	end
-	function ContextActions:BindAction(name, callback, touchButton, first, ...)
+	function ContextActions:BindAction(name, callback, touchButton, ...)
 		assert(type(name) == "string")
 		assert(type(callback) == "function")
 		assert(type(touchButton) == "boolean")
-		assert(first ~= nil)
 		ContextActions:UnbindAction(name)
 		local caac = {
 			Name = name,
 			Callback = callback,
-			Inputs = {first, ...}
+			Inputs = {...}
 		}
 		table.insert(actions, caac)
 		actionsmap[name] = caac
