@@ -7505,7 +7505,7 @@ do
 		assert(type(touchButton) == "boolean")
 		assert(first ~= nil)
 		ContextActions:UnbindAction(name)
-		caac = {
+		local caac = {
 			Name = name,
 			Callback = callback,
 			Inputs = {first, ...}
@@ -7516,7 +7516,7 @@ do
 			local button = Instance.new("ImageButton", buttonsui)
 			button.Name = Util.RandomString()
 			button.Position = UDim2.new(0, 0, 0, 0)
-			button.Size = UDim2.new(0, 40, 0, 40)
+			button.Size = UDim2.new(0, 35, 0, 35)
 			button.Image = "https://www.roblox.com/asset/?id=97166444"
 			button.BackgroundTransparency = 1
 			local txt = Instance.new("TextLabel", button)
