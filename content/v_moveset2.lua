@@ -5697,7 +5697,7 @@ AddModule(function()
 		local sound = Instance.new("Sound")
 		sound.Name = tostring(id)
 		sound.SoundId = "rbxassetid://" .. id
-		sound.Volume = 1
+		sound.Volume = 5
 		sound.Pitch = pitch
 		sound.EmitterSize = 100
 		sound.Parent = parent
@@ -6248,7 +6248,9 @@ AddModule(function()
 				hat = CFrame.new(0, m.HeadScale / 2 + 1.5 + 0.2 * math.cos(timingsine / 20), 0) * CFrame.Angles(math.rad(90), 0, 0)
 				return rt, nt, rst, lst, rht, lht, hat, 12
 			end
-			task.wait(1)
+			task.wait(0.5)
+			AuraEffect(1, 0, "Add", CFrame.new(hit), 0, 0, 0, 1, Color3.new(1, 1, 1), Vector3.zero, "Sphere", "115974234844378", 1)
+			task.wait(0.5)
 			if not rootu:IsDescendantOf(workspace) then
 				return
 			end
@@ -6256,7 +6258,7 @@ AddModule(function()
 			AuraEffect(5, 0, "Add", CFrame.new(hit) * CFrame.new(0, -2.9, 0), 0, 0, 0, 1, Color3.new(1, 1, 1), Vector3.zero, "Sphere")
 			AuraEffect(10, 0, "Add", CFrame.new(hit) * CFrame.new(0, -2.9, 0), 0, 0, 0, 2, Color3.new(1, 1, 1), Vector3.zero, "Sphere")
 			AuraEffect(1, 0, "Add", CFrame.new(hit), 1, 100000, 1, 0.5, Color3.new(1, 1, 1), Vector3.zero, "Sphere")
-			AuraEffect(1, 0, "Add", CFrame.new(hit), 1, 1, 1, 0.75, Color3.new(1, 1, 1), Vector3.zero, "Sphere", "93865949235180", 0.7)
+			AuraEffect(1, 0, "Add", CFrame.new(hit), 1, 1, 1, 0.75, Color3.new(1, 1, 1), Vector3.zero, "Sphere", "132983554155421", 1)
 			Attack(hit, 14.5)
 			animationOverride = function(timingsine, rt, nt, rst, lst, rht, lht, hat)
 				rt = RCF * CFrame.new(0, 0, -0.4 + 0.1 * math.cos(timingsine / 20)) * CFrame.Angles(math.rad(-2 + 2 * math.cos(timingsine / 12)), 0, 0)
@@ -6339,7 +6341,7 @@ AddModule(function()
 				"BLAMOOO",
 				"HA",
 			})
-			AuraEffect(1, 0, "Add", root.CFrame * CFrame.new(0, -1.9 * scale, -17 * scale), 1, 1, 1, 0.75, Color3.new(1, 1, 1), Vector3.zero, "Sphere", "93865949235180", 0.5)
+			AuraEffect(1, 0, "Add", root.CFrame * CFrame.new(0, -1.9 * scale, -17 * scale), 1, 1, 1, 0.75, Color3.new(1, 1, 1), Vector3.zero, "Sphere", "132983554155421", 0.9)
 			AuraEffect(5, 0, "Add", root.CFrame * CFrame.new(0, -1.9 * scale, -17 * scale), 0, 0, 0, 1, Color3.new(1, 1, 1), Vector3.zero, "Sphere")
 			AuraEffect(10, 0, "Add", root.CFrame * CFrame.new(0, -1.9 * scale, -17 * scale), 0, 0, 0, 2, Color3.new(1, 1, 1), Vector3.zero, "Sphere")
 			Attack(rootu.CFrame * (Vector3.new(0, -1.9, -20) * scale), 22.5 * scale)
