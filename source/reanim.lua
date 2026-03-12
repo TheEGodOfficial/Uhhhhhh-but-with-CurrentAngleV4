@@ -216,6 +216,17 @@ end
 Util.Vector2ToUDim2Offset = function(x)
 	return UDim2.fromOffset(x.X, x.Y)
 end
+Util.ForceTextSize = function(inst)
+	if inst:IsA("TextLabel") then
+		local original = inst.TextSize
+		local conn conn = RunService.PreRender:Connect(function()
+			local size = TextService:GetTextSize("TEST", original, inst.Font, Vector2.new(math.huge, math.huge))
+			inst.TextSize = (original / size.Y) * original
+			print(original, size.Y)
+		end)
+		Util.LinkDestroyI2C(inst, conn)
+	end
+end
 Util.QueryPlayerSelector = function(query, excludespeaker)
 	if #query == 0 then return end
 	query = query:lower()
@@ -382,6 +393,7 @@ do
 		Downloading.TextSize = 20
 		Downloading.Font = Enum.Font.Code
 		Downloading.Text = "Fetching Assets metadata..."
+		Util.ForceTextSize(Downloading)
 		TweenService:Create(Downloading, TweenInfo.new(0.5), {
 			Size = UDim2.new(1, 0, 0, 32)
 		}):Play()
@@ -1063,6 +1075,7 @@ local UIMainWindow, WindowContent do
 	TopBarText.Text = "Uhhhhhh Reanimate | v" .. UhhhhhhVersion
 	TopBarText.RichText = true
 	RegisterTextLabel(TopBarText)
+	Util.ForceTextSize(TopBarText)
 	if (SaveData.SkipIntro and math.random(2) == 1) or os.date("%m %d") ~= "04 01" then
 		local quotes = {
 			"Ohhhhhh Re-create | v" .. UhhhhhhVersion,
@@ -2381,6 +2394,7 @@ CracktroFrame.InputEnded:Connect(function(input)
 	end
 end)
 local AsciiText = UI.CreateText(MainPage, "", 12, Enum.TextXAlignment.Center)
+Util.ForceTextSize(AsciiText)
 task.spawn(function()
 	local AsciiTextarts = {
 		{
@@ -8036,6 +8050,7 @@ UI.CreateButton(CreditsPage, "&lt; Hurry back", 20).Activated:Connect(function()
 	end)
 end)
 local UhhhhhhFire = UI.CreateText(CreditsPage, "", 12, Enum.TextXAlignment.Center)
+Util.ForceTextSize(UhhhhhhFire)
 UI.CreateText(CreditsPage, "Reanimate by STEVE :D", 15, Enum.TextXAlignment.Right)
 local UhhhhhhFiret = UI.CreateSlider(CreditsPage, "Transparency", 0.25, 0, 1, 0)
 local UhhhhhhFirep = {}

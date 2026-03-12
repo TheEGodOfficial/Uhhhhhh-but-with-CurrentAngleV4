@@ -6575,14 +6575,6 @@ AddModule(function()
 		ContextActions:UnbindAction("Uhhhhhh_EZMagic")
 		ContextActions:UnbindAction("Uhhhhhh_EZSmash")
 		ContextActions:UnbindAction("Uhhhhhh_EZRun")
-		if uisbegin then
-			uisbegin:Disconnect()
-			uisbegin = nil
-		end
-		if uisend then
-			uisend:Disconnect()
-			uisbegin = nil
-		end
 		root, torso, hum = nil, nil, nil
 	end
 	return m
