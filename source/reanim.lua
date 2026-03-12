@@ -4047,7 +4047,7 @@ function LimbReanimator.SetRootPartMode(mode)
 end
 function LimbReanimator.Config(parent)
 	UI.CreateText(parent, "as mentioned in the README, this only works for SOME games,\nbecause 'modern' games create the Animator automatically which breaks limb reanimation", 10, Enum.TextXAlignment.Center)
-	local dmode = UI.CreateDropdown(parent, "RootPart Mode", {"RootPart in void", "Keep RootPart Streamed", "CurrentAngle Style", "RootPart is Torso"}, LimbReanimator.Mode + 1)
+	local dmode = UI.CreateDropdown(parent, "RootPart Mode", {"RootPart in very void", "RootPart in void", "Keep RootPart Streamed", "CurrentAngle Style", "RootPart is Torso"}, LimbReanimator.Mode + 1)
 	local dvel = UI.CreateDropdown(parent, "RootPart Velocity", {"No Velocity", "Follow Character", "Fling-like"}, LimbReanimator.Velocity + 1)
 	local dinit = UI.CreateDropdown(parent, "Init Mode", {"Reset Character", "CDSB + Reset", "CDSB + SSE + Kill"}, LimbReanimator.InitMode + 1)
 	dmode.Changed:Connect(function(val)
