@@ -5562,6 +5562,7 @@ AddModule(function()
 		if m.BecomeDragon then
 			rj.Enabled, nj.Enabled, rsj.Enabled, lsj.Enabled, rhj.Enabled, lhj.Enabled = false, false, false, false, false, false
 			hum.HipHeight = 2 * scale
+			root.CustomPhysicalProperties = PhysicalProperties.new(3.15, 0.3, 0.5)
 			local head = figure:FindFirstChild("Head")
 			local rarm = figure:FindFirstChild("Right Arm")
 			local larm = figure:FindFirstChild("Left Arm")
@@ -5592,6 +5593,7 @@ AddModule(function()
 		else
 			rj.Enabled, nj.Enabled, rsj.Enabled, lsj.Enabled, rhj.Enabled, lhj.Enabled = true, true, true, true, true, true
 			hum.HipHeight = 2 * scale - 2
+			root.CustomPhysicalProperties = nil
 		end
 
 		-- bullet and aura
