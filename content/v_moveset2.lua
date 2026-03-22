@@ -7329,6 +7329,20 @@ AddModule(function()
 				end
 				hum.JumpPower = 0
 			end
+			if lastfly ~= hum.Jump then
+				lastfly = hum.Jump
+				if lastfly then
+					mustfly = not wasonground
+					if mustfly then
+						CreateSound("123619882242196")
+						MagicSphere(Vector3.zero, 5, torso.CFrame * CFrame.new(-0.5 * scale, -3 * scale, 0), Color3.new(1, 0.5, 0), Vector3.new(0.5, 0.1, 0.5) * scale)
+						MagicSphere(Vector3.zero, 5, torso.CFrame * CFrame.new(0.5 * scale, -3 * scale, 0), Color3.new(1, 0.5, 0), Vector3.new(0.5, 0.1, 0.5) * scale)
+						root.Velocity += Vector3.new(0, 50, 0)
+					end
+				else
+					CreateSound("128788885488982")
+				end
+			end
 			if mustfly and hum.Jump then
 				flysound.Volume = math.min(5, flysound.Volume + dt * 20)
 				hum.WalkSpeed *= 4
@@ -7339,20 +7353,6 @@ AddModule(function()
 				flysound.Volume = math.max(0, flysound.Volume - dt * 20)
 			end
 			flysound.Playing = flysound.Volume > 0.05
-			if lastfly ~= hum.Jump then
-				lastfly = hum.Jump
-				mustfly = not wasonground
-				if mustfly then
-					if lastfly then
-						CreateSound("123619882242196")
-						MagicSphere(Vector3.zero, 5, torso.CFrame * CFrame.new(-0.5 * scale, -3 * scale, 0), Color3.new(1, 0.5, 0), Vector3.new(0.5, 0.1, 0.5) * scale)
-						MagicSphere(Vector3.zero, 5, torso.CFrame * CFrame.new(0.5 * scale, -3 * scale, 0), Color3.new(1, 0.5, 0), Vector3.new(0.5, 0.1, 0.5) * scale)
-						root.Velocity += Vector3.new(0, workspace.Gravity + 50, 0)
-					else
-						CreateSound("128788885488982")
-					end
-				end
-			end
 		end
 		
 		-- joints
