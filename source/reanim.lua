@@ -1299,6 +1299,16 @@ RunService:BindToRenderStep("Uhhhhhh_Render" .. Util.RandomString(), Enum.Render
 	end
 end)
 
+do
+	Util.Notify = function(text)
+		StarterGui:SetCore("SendNotification", {
+			Title = "Uhhhhhh",
+			Text = text,
+			Duration = 5
+		})
+	end
+end
+
 local CracktroFrame = Util.Instance("Frame", WindowContent)
 CracktroFrame.Active = true
 CracktroFrame.AnchorPoint = Vector2.new(0.5, 0.5)
@@ -4747,7 +4757,6 @@ function HatReanimator.Start()
 		elseif a:sub(1, 4) == "http" then
 			a = a:match("id=(%d+)")
 		end
-		print(a, b)
 		return a == b
 	end
 	local function ClassifyHat(hat)
@@ -6546,7 +6555,7 @@ function HatReanimator.Start()
 		for _,ref in HatRefs do
 			local ph = ref.PH
 			if ph then
-				if ref.Hat and ref.Aligned then
+				if ReanimOkay and ref.Hat and ref.Aligned then
 					ph.Transparency = 1
 				else
 					local tcf, _ = GetHatMappedCFrame(GetHatMappedOverride(ref.Map))

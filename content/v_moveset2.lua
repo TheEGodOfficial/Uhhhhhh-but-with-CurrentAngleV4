@@ -814,11 +814,6 @@ AddModule(function()
 	}
 	local leftwing = {}
 	local rightwing = {}
-	local gun = {}
-	local bullet = {}
-	local bulletstate = {Vector3.zero, Vector3.zero, 0}
-	local gunaura = {}
-	local gunaurastate = {Vector3.zero, 0}
 	local flyv, flyg = nil, nil
 	local walkingwheel = nil
 	local chatconn = nil
@@ -920,6 +915,11 @@ AddModule(function()
 	local function randomdialog(arr, glitchy)
 		notify(arr[math.random(1, #arr)], glitchy)
 	end
+	local gun = {}
+	local bullet = {}
+	local gunaura = {}
+	local bulletstate = {Vector3.zero, Vector3.zero, 0}
+	local gunaurastate = {Vector3.zero, 0}
 	local function SetBulletState(hole, target)
 		local dist = (target - hole).Magnitude
 		bulletstate[1] = hole
@@ -6482,6 +6482,14 @@ AddModule(function()
 		ContextActions:SetTitle("Uhhhhhh_EZRun", "Run")
 		ContextActions:SetPosition("Uhhhhhh_EZRun", UDim2.new(1, -230, 1, -180))
 		task.delay(0, notify, "Eyo-Zen")
+		if chatconn then
+			chatconn:Disconnect()
+		end
+		chatconn = OnPlayerChatted.Event:Connect(function(plr, msg)
+			if plr == Player then
+				notify(msg)
+			end
+		end)
 	end
 	m.Update = function(dt: number, figure: Model)
 		local t = os.clock() - start
