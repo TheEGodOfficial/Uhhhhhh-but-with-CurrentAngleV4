@@ -7315,9 +7315,14 @@ AddModule(function()
 		
 		local onground = hum:GetState() == Enum.HumanoidStateType.Running
 		
+		local gofly = false
 		if attacking then
 			hum.WalkSpeed = 8 * scale
 			hum.JumpPower = 0
+			if lastfly then
+				lastfly = false
+				CreateSound("128788885488982")
+			end
 		else
 			hum.WalkSpeed = walkspeed * scale
 			if onground then
@@ -7327,7 +7332,7 @@ AddModule(function()
 				mustfly = math.max(0, mustfly - dt)
 				hum.JumpPower = 0
 			end
-			local gofly = mustfly == 0 and hum.Jump
+			gofly = mustfly == 0 and hum.Jump
 			if lastfly ~= gofly then
 				lastfly = gofly
 				if lastfly then
@@ -7437,7 +7442,11 @@ AddModule(function()
 		
 		-- bullet
 		if bulletstate[3] < os.clock() - 0.5 then
-			bullet.CFrame = root.CFrame + Vector3.new(0, -12 * scale, 0)
+			if gofly then
+				bullet.CFrame = torso.CFrame * CFrame.new(math.random() * 2 - 1, -3, math.random() - 0.5)
+			else
+				bullet.CFrame = root.CFrame + Vector3.new(math.sin(t), -2, math.cos(t)) * scale * 6
+			end
 		else
 			local pos = (os.clock() // 0.05) % 2
 			if pos == 0 then

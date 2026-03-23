@@ -1620,7 +1620,7 @@ function UI.CreateText(parent, text, size, alignment)
 	Container.LayoutOrder = #parent:GetChildren()
 	local Text = Util.Instance("TextLabel", Container)
 	Text.Position = UDim2.new(0, margin, 0, 0)
-	Text.Size = UDim2.new(1, margin * -2, 1, -margin)
+	Text.Size = UDim2.new(1, margin * -2, 1, -margin + 1)
 	Text.BackgroundTransparency = 1
 	Text.RichText = true
 	Text.Font = Enum.Font.Code
@@ -7736,6 +7736,13 @@ local function GiveFunctionsToFunction(func)
 	env.HiddenGui = SCREENGUI
 	env.FallenPartsDestroyHeight = FallenPartsDestroyHeight
 end
+local function ClearModules()
+	Util.ClearAllChildrenGui(MovesetsPage.List)
+	Util.ClearAllChildrenGui(DancesPage.List)
+	RefreshKeybinds()
+	table.clear(MovementStyles)
+	table.clear(DanceableDances)
+end
 local function GetModuleHash(m)
 	if m.Hash then return m.Hash end
 	local str = m.Name .. ":3/:3" .. m.Description
@@ -8358,6 +8365,157 @@ task.spawn(function()
 		content.Text = "ERROR: Could not fetch"
 	end)
 end)
+task.wait()
+local function getgithubraw(path)
+	local s, resp = pcall(request, {
+		Method = "GET",
+		Url = "https://api.github.com/repos/STEVE-916-create/Uhhhhhh/contents/content/" .. path,
+		Headers = {
+			Accept = "application/vnd.github.VERSION.raw"
+		}
+	})
+	if s and resp and resp.StatusCode == 200 then
+		return resp.Body
+	end
+	s, resp = pcall(request, {
+		Method = "GET",
+		Url = "https://raw.githubusercontent.com/STEVE-916-create/Uhhhhhh/main/contents/content/" .. path,
+	})
+	if s and resp and resp.StatusCode == 200 then
+		return resp.Body
+	end
+	return nil
+end
+local function ForceModuleReload()
+	ClearModules()
+	Util.Notify("Checking SHA1 Hashes...")
+	local filesofbuiltins = {"v_moveset1.lua", "v_moveset2.lua", "v_moveset3.lua", "v_dance1.lua", "v_dance2.lua", "d_limbmap.lua", "d_hatsmap.lua"}
+	local filesofbuiltins_m = {"v_moveset1.lua", "v_moveset2.lua", "v_moveset3.lua", "v_dance1.lua", "v_dance2.lua"}
+	local filesofbuiltins_d = {"d_limbmap.lua", "d_hatsmap.lua"}
+	SaveData.ContentHash = SaveData.ContentHash or {}
+	xpcall(function()
+		local s, resp = pcall(request, {
+			Method = "GET",
+			Url = "https://api.github.com/repos/STEVE-916-create/Uhhhhhh/contents/content/",
+		})
+		if s and resp and resp.StatusCode == 200 then
+			s, resp = pcall(HttpService.JSONDecode, HttpService, resp.Body)
+			if s and resp then
+				for _,file in resp do
+					if file.name and file.sha then
+						if SaveData.ContentHash[file.name] ~= file.sha then
+							SaveData.ContentHash[file.name] = file.sha
+							if table.find(filesofbuiltins, file.name) then
+								local path = "UhhhhhhReanim/BuiltinModules/" .. file.name
+								if isfile(path) then
+									delfile(path)
+								end
+							else
+								local path = AssetGetPathFromFilename(file.name)
+								if isfile(path) then
+									delfile(path)
+								end
+							end
+						end
+					end
+				end
+			end
+		end
+	end, function()
+		Util.Notify("Failed to check for SHA1 hashes...")
+	end)
+	local wasold = false
+	if SaveData.VanillaModuleCache then
+		wasold = true
+		SaveData.VanillaModuleCache = nil
+	end
+	Util.Notify("Loading maps...")
+	for _,x in filesofbuiltins_d do
+		local path = "UhhhhhhReanim/BuiltinModules/" .. x
+		local exist = false
+		local s, a = pcall(isfile, path)
+		if s and a then exist = true end
+		if not exist then
+			local content = getgithubraw(x)
+			if content then
+				pcall(writefile, path, content)
+			else
+				Util.Notify("Failed to load " .. x .. ": Download failed.")
+				SaveData.ContentHash[x] = nil
+			end
+		end
+	end
+	Util.Notify("Loading builtin modules...")
+	for _,x in filesofbuiltins_m do
+		local path = "UhhhhhhReanim/BuiltinModules/" .. x
+		local exist = false
+		local s, a = pcall(isfile, path)
+		if s and a then exist = true end
+		if wasold then exist = false end
+		local data = ""
+		if exist then
+			data = readfile(path)
+			task.wait()
+		else
+			local content = getgithubraw(x)
+			if content then
+				pcall(writefile, path, content)
+				data = content
+			else
+				Util.Notify("Failed to load " .. x .. ": Download failed.")
+				SaveData.ContentHash[x] = nil
+			end
+		end
+		task.wait()
+		xpcall(function()
+			local func, comperr = loadstring(data, "Uhhhhhh :: VANILLA " .. x)
+			if func then
+				AddModules(func())
+			elseif comperr then
+				error("COMPILE FAILED: " .. comperr)
+			end
+		end, function(msg)
+			warn(debug.traceback("VANILLA " .. x .. ": " .. msg))
+			Util.Notify("Failed to load " .. x .. ", see console.")
+		end)
+	end
+	-- user
+	Util.Notify("Loading user modules...")
+	for _,path in listfiles("UhhhhhhReanim/Modules/") do
+		if isfile(path) then
+			--Util.Notify("User: " .. path:sub(23))
+			xpcall(function()
+				local func, comperr = loadstring(readfile(path), "Uhhhhhh :: " .. path:sub(23))
+				if func then
+					AddModules(func())
+				elseif comperr then
+					error("COMPILE FAILED: " .. comperr)
+				end
+			end, function(msg)
+				warn(debug.traceback(path .. ": " .. msg))
+				Util.Notify("Failed to load " .. path:sub(23) .. ", see console.")
+			end)
+		end
+	end
+	RefreshKeybinds()
+	Util.Notify("Init complete")
+end
+ForceModuleReload()
+UI.CreateSeparator(MainPage)
+UI.CreateText(MainPage, "<b>MODULES MANAGEMENT</b>", 15, Enum.TextXAlignment.Center)
+UI.CreateButton(MainPage, "Reload Modules", 20).Activated:Connect(function()
+	CracktroFrame.Interactable = false
+	CracktroFrame.Visible = true
+	MainPage.Interactable = false
+	local tween = TweenService:Create(CracktroFrame, TweenInfo.new(0.5, Enum.EasingStyle.Cubic, Enum.EasingDirection.In), {
+		Position = UDim2.new(0.5, 0, 0.5, 0),
+	})
+	tween:Play()
+	tween.Completed:Connect(function()
+		CracktroFrame.Interactable = true
+	end)
+	ForceModuleReload()
+end)
 UI.CreateText(MainPage, "\n\n\n<b>DANGER ZONE</b>", 15, Enum.TextXAlignment.Center)
 local clearcontenthash, clearcontenthashtext = UI.CreateButton(MainPage, "CLEAR ALL DOWNLOADED CONTENT", 15)
 local clearcontenthashclicks = 0
@@ -8380,137 +8538,5 @@ clearcontenthash.Activated:Connect(function()
 		clearcontenthashtext.Text = "Cleared, now rejoin to apply"
 	end
 end)
-task.wait()
-Util.Notify("Checking SHA1 Hashes...")
-local filesofbuiltins = {"v_moveset1.lua", "v_moveset2.lua", "v_moveset3.lua", "v_dance1.lua", "v_dance2.lua", "d_limbmap.lua", "d_hatsmap.lua"}
-local filesofbuiltins_m = {"v_moveset1.lua", "v_moveset2.lua", "v_moveset3.lua", "v_dance1.lua", "v_dance2.lua"}
-local filesofbuiltins_d = {"d_limbmap.lua", "d_hatsmap.lua"}
-SaveData.ContentHash = SaveData.ContentHash or {}
-xpcall(function()
-	local s, resp = pcall(request, {
-		Method = "GET",
-		Url = "https://api.github.com/repos/STEVE-916-create/Uhhhhhh/contents/content/",
-	})
-	if s and resp and resp.StatusCode == 200 then
-		s, resp = pcall(HttpService.JSONDecode, HttpService, resp.Body)
-		if s and resp then
-			for _,file in resp do
-				if file.name and file.sha then
-					if SaveData.ContentHash[file.name] ~= file.sha then
-						SaveData.ContentHash[file.name] = file.sha
-						if table.find(filesofbuiltins, file.name) then
-							local path = "UhhhhhhReanim/BuiltinModules/" .. file.name
-							if isfile(path) then
-								delfile(path)
-							end
-						else
-							local path = AssetGetPathFromFilename(file.name)
-							if isfile(path) then
-								delfile(path)
-							end
-						end
-					end
-				end
-			end
-		end
-	end
-end, function()
-	Util.Notify("Failed to check for SHA1 hashes...")
-end)
-local wasold = false
-if SaveData.VanillaModuleCache then
-	wasold = true
-	SaveData.VanillaModuleCache = nil
-end
-local function getgithubraw(path)
-	local s, resp = pcall(request, {
-		Method = "GET",
-		Url = "https://api.github.com/repos/STEVE-916-create/Uhhhhhh/contents/content/" .. path,
-		Headers = {
-			Accept = "application/vnd.github.VERSION.raw"
-		}
-	})
-	if s and resp and resp.StatusCode == 200 then
-		return resp.Body
-	end
-	s, resp = pcall(request, {
-		Method = "GET",
-		Url = "https://raw.githubusercontent.com/STEVE-916-create/Uhhhhhh/main/contents/content/" .. path,
-	})
-	if s and resp and resp.StatusCode == 200 then
-		return resp.Body
-	end
-	return nil
-end
-Util.Notify("Loading maps...")
-for _,x in filesofbuiltins_d do
-	local path = "UhhhhhhReanim/BuiltinModules/" .. x
-	local exist = false
-	local s, a = pcall(isfile, path)
-	if s and a then exist = true end
-	if not exist then
-		local content = getgithubraw(x)
-		if content then
-			pcall(writefile, path, content)
-		else
-			Util.Notify("Failed to load " .. x .. ": Download failed.")
-			SaveData.ContentHash[x] = nil
-		end
-	end
-end
-Util.Notify("Loading builtin modules...")
-for _,x in filesofbuiltins_m do
-	local path = "UhhhhhhReanim/BuiltinModules/" .. x
-	local exist = false
-	local s, a = pcall(isfile, path)
-	if s and a then exist = true end
-	if wasold then exist = false end
-	local data = ""
-	if exist then
-		data = readfile(path)
-		task.wait()
-	else
-		local content = getgithubraw(x)
-		if content then
-			pcall(writefile, path, content)
-			data = content
-		else
-			Util.Notify("Failed to load " .. x .. ": Download failed.")
-			SaveData.ContentHash[x] = nil
-		end
-	end
-	task.wait()
-	xpcall(function()
-		local func, comperr = loadstring(data, "Uhhhhhh :: VANILLA " .. x)
-		if func then
-			AddModules(func())
-		elseif comperr then
-			error("COMPILE FAILED: " .. comperr)
-		end
-	end, function(msg)
-		warn(debug.traceback("VANILLA " .. x .. ": " .. msg))
-		Util.Notify("Failed to load " .. x .. ", see console.")
-	end)
-end
--- user
-Util.Notify("Loading user modules...")
-for _,path in listfiles("UhhhhhhReanim/Modules/") do
-	if isfile(path) then
-		--Util.Notify("User: " .. path:sub(23))
-		xpcall(function()
-			local func, comperr = loadstring(readfile(path), "Uhhhhhh :: " .. path:sub(23))
-			if func then
-				AddModules(func())
-			elseif comperr then
-				error("COMPILE FAILED: " .. comperr)
-			end
-		end, function(msg)
-			warn(debug.traceback(path .. ": " .. msg))
-			Util.Notify("Failed to load " .. path:sub(23) .. ", see console.")
-		end)
-	end
-end
-RefreshKeybinds()
-Util.Notify("Init complete")
 
 IsUhhhhhhFullyLoaded = true
