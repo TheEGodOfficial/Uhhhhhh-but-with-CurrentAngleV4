@@ -7012,6 +7012,7 @@ AddModule(function()
 	local function MagicSphere(size, ticks, cf, color, grow, move, transp)
 		grow = grow or Vector3.zero
 		move = move or Vector3.zero
+		transp = transp or 0
 		local part = CreatePart(cf, Vector3.one, color, nil, transp)
 		local mesh = Instance.new("SpecialMesh", part)
 		mesh.MeshType = "Sphere"
@@ -7025,7 +7026,7 @@ AddModule(function()
 				elapsed += dt
 				mesh.Scale = size + grow * elapsed * 60
 				mesh.Offset = move * elapsed * 60
-				part.Transparency = elapsed / lifetime
+				part.Transparency = (1 - transp) * (elapsed / lifetime) + transp
 			end
 			part:Destroy()
 		end)
@@ -7060,7 +7061,7 @@ AddModule(function()
 			MagicSphere(
 				Vector3.new(0, 0, 0.05) * scale, 20, CFrame.lookAlong(ground.Position, ground.Normal), Color3.new(1, 1, 1),
 				Vector3.new(1, 1, 0):Lerp(Vector3.new(0.2, 0.2, 0), math.pow(dist, 3)) * scale,
-				Vector3.new(0, 0, 0), dist * 0.1 + 0.9
+				Vector3.new(0, 0, 0), dist * 0.3 + 0.7
 			)
 		end
 	end
