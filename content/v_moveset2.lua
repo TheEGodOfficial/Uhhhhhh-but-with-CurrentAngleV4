@@ -6734,7 +6734,6 @@ AddModule(function()
 		sound.SoundId = "rbxassetid://" .. id
 		sound.Volume = 1
 		sound.Pitch = pitch
-		sound.EmitterSize = 100
 		sound.Parent = parent
 		sound:Play()
 		sound.Ended:Connect(function()
@@ -6822,7 +6821,7 @@ AddModule(function()
 				end
 				update()
 				text.Text = string.sub(message, 1, l)
-			until ll >= #message or not dialog.Parent == torso
+			until ll >= #message or dialog.Parent ~= torso
 			text.Text = message
 			t = os.clock()
 			repeat
@@ -7323,16 +7322,17 @@ AddModule(function()
 				lastfly = false
 				CreateSound("128788885488982")
 			end
+			mustfly = 0.05
 		else
 			hum.WalkSpeed = walkspeed * scale
 			if onground then
 				hum.JumpPower = 50 * scale
 				mustfly = 0.2
 			else
-				mustfly = math.max(0, mustfly - dt)
 				hum.JumpPower = 0
+				mustfly = math.max(0, mustfly - dt)
 			end
-			gofly = mustfly == 0 and hum.Jump
+			gofly = mustfly <= 0 and hum.Jump
 			if lastfly ~= gofly then
 				lastfly = gofly
 				if lastfly then
