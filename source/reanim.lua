@@ -129,12 +129,12 @@ end
 -- WILL THIS FIX CRASHES IDK ????????
 local pcall = function(func, ...)
 	return pcall(function(...)
-		func(...)
+		return func(...)
 	end, ...)
 end
 local xpcall = function(func, ...)
 	return xpcall(function(...)
-		func(...)
+		return func(...)
 	end, ...)
 end
 
