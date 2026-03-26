@@ -823,6 +823,14 @@ if SaveData.MuteUIMusic then
 	end
 end
 
+UISound.Click = Util.Instance("Sound", UIMainFrame)
+UISound.Click.SoundId = "rbxassetid://118806752369227"
+UISound.Click.Volume = 1
+UISound.Click.PlaybackSpeed = 2
+if SaveData.MuteUISound then
+	UISound.Click.Volume = 0
+end
+
 local StylizedObjs = {}
 local function Stylize(obj, options)
 	options = options or {}
@@ -950,88 +958,89 @@ end
 local function SetUITheme(index)
 	local UIThemes = {
 		-- RGB/Default
-		{nil, nil, Color3.new(1, 1, 1)},
+		{},
 		-- ALONE
-		{Color3.new(1, 1, 1), nil, Color3.new(1, 1, 1)},
+		{Fore = Color3.new(1, 1, 1), SndClick = "rbxassetid://81715128969224"},
 		-- Oxide
-		{Color3.fromRGB(49, 203, 233), Color3.fromRGB(38, 38, 38), Color3.fromRGB(49, 203, 233)},
+		{Fore = Color3.fromRGB(49, 203, 233), Back = Color3.fromRGB(38, 38, 38), Text = Color3.fromRGB(49, 203, 233)},
 		-- Patchma-like
-		{Color3.new(0.0941177, 0.317647, 0.878431), nil, Color3.new(0.560784, 0.560784, 0.560784)},
+		{Fore = Color3.new(0.0941177, 0.317647, 0.878431), Text = Color3.new(0.560784, 0.560784, 0.560784)},
 		-- Genesis V4 - Neptunian V
-		{Color3.fromHex("7733FF"), Color3.fromHex("161330"), Color3.new(1, 1, 1)},
+		{Fore = Color3.fromHex("7733FF"), Back = Color3.fromHex("161330"), SndClick = "rbxassetid://80526571264304"},
 		-- Crimson
-		{Color3.new(0.9, 0, 0), Color3.new(0.05, 0, 0), Color3.new(1, 1, 1)},
+		{Fore = Color3.new(0.9, 0, 0), Back = Color3.new(0.05, 0, 0)},
 		-- r/masterhacker
-		{Color3.new(0, 1, 0), nil, Color3.new(0, 1, 0)},
+		{Fore = Color3.new(0, 1, 0), Text = Color3.new(0, 1, 0)},
 		-- Homer simpson
-		{Color3.new(0, 0, 0), Color3.new(1, 0.95, 0), Color3.new(0, 0, 0)},
+		{Fore = Color3.new(0, 0, 0), Back = Color3.new(1, 0.95, 0), Text = Color3.new(0, 0, 0)},
 		-- Immortality Lord
-		{Color3.new(0.1, 0.1, 0.1), nil, Color3.new(1, 1, 1)},
+		{Fore = Color3.new(0.1, 0.1, 0.1), Text = Color3.new(1, 1, 1)},
 		-- RGB LIGHT
-		{nil, Color3.new(1, 1, 1), Color3.new(0, 0, 0)},
+		{Back = Color3.new(1, 1, 1), Text = Color3.new(0, 0, 0)},
 		-- ALONE LIGHT
-		{Color3.new(0, 0, 0), Color3.new(1, 1, 1), Color3.new(0, 0, 0)},
+		{Fore = Color3.new(0, 0, 0), Back = Color3.new(1, 1, 1), Text = Color3.new(0, 0, 0), SndClick = "rbxassetid://81715128969224"},
 		-- ROSR
-		{Color3.new(0, 0, 0), Color3.new(1, 0.6, 0), Color3.new(1, 1, 1)},
+		{Fore = Color3.new(0, 0, 0), Back = Color3.new(1, 0.6, 0)},
 		-- FastTracker II Blue
-		{Color3.fromHex("333780"), Color3.fromHex("666EFF"), Color3.new(1, 1, 1)},
+		{Fore = Color3.fromHex("333780"), Back = Color3.fromHex("666EFF"), Text = Color3.new(1, 1, 1)},
 		-- Cherry Blossom
-		{Color3.fromHex("75284B"), Color3.fromHex("F7ABE8"), Color3.fromHex("75284B")},
+		{Fore = Color3.fromHex("75284B"), Back = Color3.fromHex("F7ABE8"), Text = Color3.fromHex("75284B")},
 		-- Cherry Blossom Inverted
-		{Color3.fromHex("F7ABE8"), Color3.fromHex("75284B"), Color3.new(1, 1, 1)},
+		{Fore = Color3.fromHex("F7ABE8"), Back = Color3.fromHex("75284B"), Text = Color3.new(1, 1, 1)},
 		-- Tommorow Night 80s
-		{Color3.fromHex("272727"), Color3.fromHex("2D2D2D"), Color3.fromHex("BEBEBE")},
+		{Fore = Color3.fromHex("272727"), Back = Color3.fromHex("2D2D2D"), Text = Color3.fromHex("BEBEBE"), SndClick = "rbxassetid://86097124503088"},
 	}
-	local theme = UIThemes[index]
-	if index == #UIThemes + 1 then
-		theme = {nil, nil, Color3.new(1, 1, 1)}
-		local function processtable(t)
-			if typeof(t.Fore) == "Color3" then
-				theme[1] = t.Fore
-			end
-			if typeof(t.Back) == "Color3" then
-				theme[2] = t.Back
-			end
-			if typeof(t.Text) == "Color3" then
-				theme[3] = t.Text
-			end
-			if typeof(t.Fore) == "string" then
-				theme[1] = Color3.fromHex(t.Fore)
-			end
-			if typeof(t.Back) == "string" then
-				theme[2] = Color3.fromHex(t.Back)
-			end
-			if typeof(t.Text) == "string" then
-				theme[3] = Color3.fromHex(t.Text)
-			end
+	local theme = {nil, nil, Color3.new(1, 1, 1), "rbxassetid://118806752369227"}
+	local function processtable(t)
+		if typeof(t.Fore) == "Color3" then
+			theme[1] = t.Fore
 		end
+		if typeof(t.Back) == "Color3" then
+			theme[2] = t.Back
+		end
+		if typeof(t.Text) == "Color3" then
+			theme[3] = t.Text
+		end
+		if typeof(t.Fore) == "string" then
+			theme[1] = Color3.fromHex(t.Fore)
+		end
+		if typeof(t.Back) == "string" then
+			theme[2] = Color3.fromHex(t.Back)
+		end
+		if typeof(t.Text) == "string" then
+			theme[3] = Color3.fromHex(t.Text)
+		end
+		if typeof(t.Text) == "string" then
+			theme[3] = Color3.fromHex(t.Text)
+		end
+		if typeof(t.SndClick) == "string" then
+			theme[4] = t.SndClick
+		end
+	end
+	if index == #UIThemes + 1 then
 		if type(_G.UhhhhhhTheme) == "table" and getmetatable(_G.UhhhhhhTheme) == nil then
 			processtable(_G.UhhhhhhTheme)
 			SaveData.UIThemeUserDefined = {
 				Fore = theme[1] and theme[1]:ToHex(),
 				Back = theme[2] and theme[2]:ToHex(),
 				Text = theme[3] and theme[3]:ToHex() or "FFFFFF",
+				SndClick = theme[4],
 			}
 		elseif type(SaveData.UIThemeUserDefined) == "table" then
 			processtable(SaveData.UIThemeUserDefined)
 		end
+	elseif UIThemes[index] then
+		processtable(UIThemes[index])
 	end
 	if theme then
 		ForceUIColor = theme[1]
 		ForceUIBGColor = theme[2]
 		UITextColor.Value = theme[3]
+		UISound.Click.SoundId = theme[4]
 	end
 end
 SaveData.UITheme = SaveData.UITheme or 1
 SetUITheme(SaveData.UITheme)
-
-UISound.Click = Util.Instance("Sound", UIMainFrame)
-UISound.Click.SoundId = "rbxassetid://6324790483"
-UISound.Click.Volume = 1
-UISound.Click.PlaybackSpeed = 2
-if SaveData.MuteUISound then
-	UISound.Click.Volume = 0
-end
 
 local CracktroFrameText = "Uhhhhhh Reanimate V" .. UhhhhhhVersion
 local UIMainWindow, WindowContent do
