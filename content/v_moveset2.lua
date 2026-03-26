@@ -7235,6 +7235,62 @@ AddModule(function()
 			attacking = false
 		end)
 	end
+	local function SecondaryMelee()
+		if not m.IgnoreDancing then
+			if isdancing then return end
+		end
+		if attacking and not m.NoCooldown then return end
+		if not root or not hum or not torso then return end
+		local rootu = root
+		attacking = true
+		PrimaryMelee_index = 0
+		if os.clock() - PrimaryMelee_lastatk > 1 then
+			randomdialog({
+				"Suppressing Threat...",
+				"Eliminating Target...",
+				"Target Locking On...",
+				"Executing Ranged Protocol...",
+				"Distanced Combat In Progress...",
+				"Shot Fired"
+			})
+		end
+		PrimaryMelee_lastatk = os.clock()
+		task.spawn(function()
+			animationOverride = function(timingsine, rt, nt, rst, lst, rht, lht)
+				rt, nt, rst, lst, rht, lht = lerps.punch(timingsine * math.pi * 8, rt, nt, rst, lst, rht, lht)
+				return rt, nt, rst, lst, rht, lht, 30
+			end
+			task.wait(0.1)
+			if not rootu:IsDescendantOf(workspace) then
+				return
+			end
+			CreateSound("156572165")
+			CreateSound("130679953063646")
+			local target = MouseHit()
+			local hole = root.CFrame * CFrame.new(Vector3.new(1, 0.5, -5) * scale)
+			hole = HatReanimator.GetAttachmentCFrame(gun.Group .. "Attachment") or hole
+			local raycast = PhysicsRaycast(hole.Position, target - hole.Position)
+			if raycast then
+				target = raycast.Position
+			end
+			SetBulletState(hole.Position, target)
+			Attack(CFrame.lookAt((hole.Position + target) / 2, target), Vector3.new(3, 3, (target - hole.Position).Magnitude))
+			MagicSphere(Vector3.zero, 20, hole, Color3.new(1, 1, 0), Vector3.one * 0.3)
+			MagicSphere(Vector3.zero, 20, CFrame.new(target), Color3.new(1, 1, 0), Vector3.one * 0.3)
+			MagicSphere(Vector3.new(0, 0, (target - hole.Position).Magnitude), 10, CFrame.lookAt((hole.Position + target) / 2, target), Color3.new(1, 1, 0), Vector3.new(0.2, 0.2, 0))
+			animationOverride = function(timingsine, rt, nt, rst, lst, rht, lht)
+				rt, nt, rst, lst, rht, lht = lerps.shoot(-math.pi / 2, rt, nt, rst, lst, rht, lht)
+				AimTowards(target)
+				return rt, nt, rst, lst, rht, lht, 20
+			end
+			task.wait(0.1)
+			if not rootu:IsDescendantOf(workspace) then
+				return
+			end
+			animationOverride = nil
+			attacking = false
+		end)
+	end
 	local function SwitchMode()
 		if not m.IgnoreDancing then
 			if isdancing then return end
@@ -7320,7 +7376,7 @@ AddModule(function()
 		}
 		table.insert(HatReanimator.HatCFrameOverride, gun)
 		table.insert(HatReanimator.HatCFrameOverride, bullet)
-		ContextActions:BindAction("Uhhhhhh_BSShoot", function(_, state, _)
+		ContextActions:BindAction("Uhhhhhh_BSPrime", function(_, state, _)
 			if state == Enum.UserInputState.Begin then
 				if hasgun then
 					PrimaryRanged()
@@ -7329,8 +7385,19 @@ AddModule(function()
 				end
 			end
 		end, true, Enum.UserInputType.MouseButton1)
-		ContextActions:SetTitle("Uhhhhhh_BSShoot", "M1")
-		ContextActions:SetPosition("Uhhhhhh_BSShoot", UDim2.new(1, -130, 1, -130))
+		ContextActions:SetTitle("Uhhhhhh_BSPrime", "M1")
+		ContextActions:SetPosition("Uhhhhhh_BSPrime", UDim2.new(1, -130, 1, -130))
+		--[[ContextActions:BindAction("Uhhhhhh_BSSecon", function(_, state, _)
+			if state == Enum.UserInputState.Begin then
+				if hasgun then
+					SecondaryRanged()
+				else
+					SecondaryMelee()
+				end
+			end
+		end, true, Enum.UserInputType.MouseButton1)
+		ContextActions:SetTitle("Uhhhhhh_BSSecon", "R")
+		ContextActions:SetPosition("Uhhhhhh_BSSecon", UDim2.new(1, -180, 1, -130))]]
 		ContextActions:BindAction("Uhhhhhh_BSHolst", function(_, state, _)
 			if state == Enum.UserInputState.Begin then
 				SwitchMode()
@@ -7360,7 +7427,7 @@ AddModule(function()
 			end
 		end, true, Enum.KeyCode.LeftControl)
 		ContextActions:SetTitle("Uhhhhhh_BSRun", "Run")
-		ContextActions:SetPosition("Uhhhhhh_BSRun", UDim2.new(1, -180, 1, -130))
+		ContextActions:SetPosition("Uhhhhhh_BSRun", UDim2.new(1, -180, 1, -180))
 		task.delay(0.2, randomdialog, {
 			"Kernel BANISHER.BIN Loaded",
 			"Your Time-To-Live is about to reach 0.", -- packet larp
@@ -7548,7 +7615,8 @@ AddModule(function()
 		end
 	end
 	m.Destroy = function(figure: Model?)
-		ContextActions:UnbindAction("Uhhhhhh_BSShoot")
+		ContextActions:UnbindAction("Uhhhhhh_BSPrime")
+		ContextActions:UnbindAction("Uhhhhhh_BSSecon")
 		ContextActions:UnbindAction("Uhhhhhh_BSHolst")
 		ContextActions:UnbindAction("Uhhhhhh_BSRun")
 		root, torso, hum = nil, nil, nil

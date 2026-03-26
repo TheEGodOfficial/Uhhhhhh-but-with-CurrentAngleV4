@@ -38,7 +38,7 @@ AddModule(function()
 	local Lerp = CFrame.identity.Lerp
 	local cfMul = function(a, b) return a * b end
 	local cf = CFrame.new
-	local angles = CFrame.Angles
+	local angles = CFrame.fromEulerAnglesXYZ
 	local v2 = Vector2.new 
 	local v3 = Vector3.new
 	local mrandom = math.random
@@ -51,6 +51,63 @@ AddModule(function()
 	local round = math.round
 	local cf_0 = CFrame.identity
 	local twait = task.wait
+
+	local animatorcfg
+	local function animatorreset()
+		animatorcfg = {
+			-- val, sinval, sinspeed, sinoff
+			RootJoint = {
+				x = {0, 0, 1, 0},
+				y = {0, 0, 1, 0},
+				z = {0, 0, 1, 0},
+				rx = {90, 0, 1, 0},
+				ry = {0, 0, 1, 0},
+				rz = {180, 0, 1, 0},
+			},
+			Neck = {
+				x = {0, 0, 1, 0},
+				y = {1, 0, 1, 0},
+				z = {0, 0, 1, 0},
+				rx = {90, 0, 1, 0},
+				ry = {0, 0, 1, 0},
+				rz = {180, 0, 1, 0},
+			},
+			RightShoulder = {
+				x = {1, 0, 1, 0},
+				y = {0.5, 0, 1, 0},
+				z = {0, 0, 1, 0},
+				rx = {0, 0, 1, 0},
+				ry = {-90, 0, 1, 0},
+				rz = {0, 0, 1, 0},
+			},
+			LeftShoulder = {
+				x = {-1, 0, 1, 0},
+				y = {0.5, 0, 1, 0},
+				z = {0, 0, 1, 0},
+				rx = {0, 0, 1, 0},
+				ry = {90, 0, 1, 0},
+				rz = {0, 0, 1, 0},
+			},
+			RightHip = {
+				x = {1, 0, 1, 0},
+				y = {-1, 0, 1, 0},
+				z = {0, 0, 1, 0},
+				rx = {0, 0, 1, 0},
+				ry = {-90, 0, 1, 0},
+				rz = {0, 0, 1, 0},
+			},
+			LeftHip = {
+				x = {-1, 0, 1, 0},
+				y = {-1, 0, 1, 0},
+				z = {0, 0, 1, 0},
+				rx = {0, 0, 1, 0},
+				ry = {90, 0, 1, 0},
+				rz = {0, 0, 1, 0},
+			},
+			speed = 16,
+		}
+	end
+	animatorreset()
 
 	local anims = {
 		function(t)
@@ -1265,7 +1322,29 @@ AddModule(function()
 				end
 			})
 		end,
-		emptyfunction
+		function()
+			local getJoint=t.getJoint
+			local map = {
+				RootJoint=getJoint("RootJoint"),
+				RightShoulder=getJoint("Right Shoulder"),
+				LeftShoulder=getJoint("Left Shoulder"),
+				RightHip=getJoint("Right Hip"),
+				LeftHip=getJoint("Left Hip"),
+				Neck=getJoint("Neck"),
+			}
+			local function apply(n, j)
+				local function a(t)
+					return t[1] + t[2] * math.sin(sine * t[3] + t[4])
+				end
+				local t = animatorcfg[n]
+				j.C0 = Lerp(j.C0, cfMul(cf(a(t.x), a(t.y), a(t.z)), angles(math.rad(a(t.rx)), math.rad(a(t.ry)), math.rad(a(t.rz)))), math.exp(-animatorcfg.speed * deltaTime))
+			end
+			t.addmode("default", {
+				idle=function()
+					for k,v in map do apply(k, v) end
+				end
+			})
+		end,
 	}
 
 	m.AnimIndex = 1
@@ -1277,7 +1356,8 @@ AddModule(function()
 			i1.Font = Enum.Font.SourceSans
 			i1.TextSize = 18
 			i1.Text = txt
-			i1.Position = UDim2.new(0.5, 0, 0.5, 0)
+			i1.Position = UDim2.new(0, 0, 0, 0)
+			i1.Size = UDim2.new(1, 0, 1, 0)
 			i1.TextColor3 = Color3.new(0.0941177, 0.317647, 0.878431)
 			i1.Name = RandomString()
 			i1.Parent = i2
@@ -1290,7 +1370,7 @@ AddModule(function()
 				i2.MouseButton1Click:Connect(f)
 			end
 			i2.Parent = parent
-			return i1
+			return i1, i2
 		end
 		local lbl = function(txt)
 			local i1 = Instance.new("TextLabel") 
@@ -1299,7 +1379,8 @@ AddModule(function()
 			i1.Font = Enum.Font.SourceSans
 			i1.TextSize = 18
 			i1.Text = txt
-			i1.Position = UDim2.new(0.5, 0, 0.5, 0)
+			i1.Position = UDim2.new(0, 0, 0, 0)
+			i1.Size = UDim2.new(1, 0, 1, 0)
 			i1.TextColor3 = Color3.new(0.560784, 0.560784, 0.560784)
 			i1.Name = RandomString()
 			i1.Parent = i2
@@ -1308,7 +1389,7 @@ AddModule(function()
 			i2.Name = RandomString()
 			i2.LayoutOrder = 67
 			i2.Parent = parent
-			return i1
+			return i1, i2
 		end
 		local lbls = {}
 		local update = function()
@@ -1354,6 +1435,316 @@ AddModule(function()
 		lbl("shoot me a pm for whatever quote")
 		lbl("u wanna add here? idk i just think")
 		lbl("u got some ideas/wanna add stuff here")
+		lbl("")
+		lbl("vv use empty reanimate vv")
+		local animatorbtn = nil
+		_, animatorbtn = btn("open MW animator lite", function()
+			animatorbtn:Destroy()
+			local update = {}
+			local sig = function(x)
+				x = tostring(x):lower()
+				local exp = x:split("e")
+				x = exp[1]
+				local dec = x:split(".")
+				if #dec == 1 then
+					return x .. "e" .. exp[2]
+				end
+				x = dec[1]
+				dec = dec[2]:sub(1, 3)
+				while dec:sub(-1, -1) == "0" do
+					dec = dec:sub(1, -2)
+				end
+				if #dec > 0 then
+					x ..= "." .. dec
+				end
+				return x .. "e" .. exp[2]
+			end
+			local lmao = function(k, t, i, mmhm)
+				if mmhm == "mmhm" then
+					k.Text = sig(t[i])
+				end
+				if #k.Text > 0 then
+					t[i] = tonumber(k.Text) or t[i]
+				end
+				if k:IsFocused() then return end
+				k.Text = sig(t[i])
+			end
+			local prop = function(txt, a, b)
+				local fr = Instance.new("Frame")
+				fr.BackgroundTransparency = 1
+				fr.Size = UDim2.new(1, 0, 0, 20)
+				fr.Name = RandomString()
+				fr.LayoutOrder = 67
+				fr.Parent = parent
+				local lol = function(cl, x, txt)
+					local i1 = Instance.new(cl)
+					i1.BackgroundTransparency = 1
+					i1.Font = Enum.Font.SourceSans
+					i1.TextSize = 18
+					i1.Text = txt
+					i1.AnchorPoint = Vector2.new(0.5, 0)
+					i1.Position = UDim2.new(0.5, x, 0, 0)
+					i1.Size = UDim2.new(0, 45, 1, 0)
+					i1.TextColor3 = Color3.new(0.560784, 0.560784, 0.560784)
+					i1.Name = RandomString()
+					i1.Parent = fr
+					return i1
+				end
+				local i1 = lol("TextLabel", -100, txt)
+				i1.TextXAlignment = "Right"
+				local val = lol("TextBox", -50, "")
+				val.PlaceholderText = "0"
+				local sval = lol("TextBox", 0, "")
+				sval.PlaceholderText = "0"
+				local smul = lol("TextBox", 50, "")
+				smul.PlaceholderText = "0"
+				local soff = lol("TextBox", 100, "")
+				soff.PlaceholderText = "0"
+				local this = function(mmhm)
+					local t = animatorcfg[a][b]
+					lmao(val, t, 1, mmhm)
+					lmao(sval, t, 2, mmhm)
+					lmao(smul, t, 3, mmhm)
+					lmao(soff, t, 4, mmhm)
+				end
+				this()
+				val.Changed:Connect(this)
+				sval.Changed:Connect(this)
+				smul.Changed:Connect(this)
+				soff.Changed:Connect(this)
+				val.FocusLost:Connect(this)
+				sval.FocusLost:Connect(this)
+				smul.FocusLost:Connect(this)
+				soff.FocusLost:Connect(this)
+				table.insert(update, this)
+			end
+			local prop1 = function(txt, a)
+				local fr = Instance.new("Frame")
+				fr.BackgroundTransparency = 1
+				fr.Size = UDim2.new(1, 0, 0, 20)
+				fr.Name = RandomString()
+				fr.LayoutOrder = 67
+				fr.Parent = parent
+				local lol = function(cl, x, txt)
+					local i1 = Instance.new(cl)
+					i1.BackgroundTransparency = 1
+					i1.Font = Enum.Font.SourceSans
+					i1.TextSize = 18
+					i1.Text = txt
+					i1.AnchorPoint = Vector2.new(0.5, 0)
+					i1.Position = UDim2.new(0.5, x, 0, 0)
+					i1.Size = UDim2.new(0, 45, 1, 0)
+					i1.TextColor3 = Color3.new(0.560784, 0.560784, 0.560784)
+					i1.Name = RandomString()
+					i1.Parent = fr
+					return i1
+				end
+				local i1 = lol("TextLabel", -25, txt)
+				i1.TextXAlignment = "Right"
+				local val = lol("TextBox", -25, "")
+				val.PlaceholderText = "0"
+				local this = function(mmhm)
+					if mmhm == "mmhm" then
+						k.Text = sig(animatorcfg[a])
+					end
+					if #k.Text > 0 then
+						animatorcfg[a] = tonumber(k.Text) or animatorcfg[a]
+					end
+					if k:IsFocused() then return end
+					k.Text = sig(animatorcfg[a])
+				end
+				this()
+				val.Changed:Connect(this)
+				val.FocusLost:Connect(this)
+				table.insert(update, this)
+			end
+			btn("x1/2 speed", function()
+				for _,k in {"RootJoint", "Neck", "RightShoulder", "LeftShoulder", "RightHip", "LeftHip"} do
+					local v = animatorcfg[k]
+					for _,w in v do
+						w[3] /= 2
+						w[4] /= 2
+					end
+				end
+				for _,v in update do v("mmhm") end
+			end)
+			btn("x2 speed", function()
+				for _,k in {"RootJoint", "Neck", "RightShoulder", "LeftShoulder", "RightHip", "LeftHip"} do
+					local v = animatorcfg[k]
+					for _,w in v do
+						w[3] *= 2
+						w[4] *= 2
+					end
+				end
+				for _,v in update do v("mmhm") end
+			end)
+			btn("reset animator", function()
+				animatorreset()
+				for _,v in update do v("mmhm") end
+			end)
+			local prop2 = function(name, joint)
+				prop(name .."X", joint, "x")
+				prop(       "Y", joint, "y")
+				prop(       "Z", joint, "z")
+				prop(   "Rot X", joint, "rx")
+				prop(   "Rot Y", joint, "ry")
+				prop(   "Rot Z", joint, "rz")
+			end
+			prop1("Lerp Speed", "speed")
+			prop2("Torso", "RootJoint")
+			prop2("Head", "Neck")
+			prop2("Left Arm", "LeftShoulder")
+			prop2("Right Arm", "RightShoulder")
+			prop2("Left Leg", "LeftHip")
+			prop2("Right Leg", "RightHip")
+			btn("copy lerps to clipboard", function()
+				local MW_animatorProgressSave = {}
+				local function applyj(n)
+					local x = `{n}.C0=Lerp({n}.C0,`
+					local t = animatorcfg[n]
+					local zero = function(k)
+						if t[k][1] == 0 then
+							if t[k][3] == 0 and math.sin(t[k][4]) <= 0.005 then
+								return true
+							elseif t[k][2] == 0 then
+								return true
+							end
+						end
+						return false
+					end
+					local conv = function(k, mul)
+						local t = t[k]
+						if t[1] == 0 then
+							if t[2] == 0 then
+								return "0"
+							else
+								if t[3] == 0 then
+									return sig(t[2] * math.sin(t[4]) * mul)
+								elseif t[3] == 1 then
+									return sig(t[2] * mul) .. "*sin(sine+" .. sig(t[4] % (math.pi * 2)) .. ")"
+								elseif t[3] == -1 then
+									return sig(t[2] * mul) .. "*sin(" .. sig(t[4] % (math.pi * 2)) .. "-sine)"
+								else
+									return sig(t[2] * mul) .. "*sin(sine*" .. sig(t[3]) .. "+" .. sig(t[4] % (math.pi * 2)) .. ")"
+								end
+							end
+						else
+							if t[2] == 0 then
+								return "0"
+							else
+								if t[3] == 0 then
+									return sig(t[1] * mul + t[2] * math.sin(t[4]) * mul)
+								elseif t[3] == 1 then
+									return sig(t[1] * mul) .. "+" .. sig(t[2] * mul) .. "*sin(sine+" .. sig(t[4] % (math.pi * 2)) .. ")"
+								elseif t[3] == -1 then
+									return sig(t[1] * mul) .. "+" .. sig(t[2] * mul) .. "*sin(" .. sig(t[4] % (math.pi * 2)) .. "-sine)"
+								else
+									return sig(t[1] * mul) .. "+" .. sig(t[2] * mul) .. "*sin(sine*" .. sig(t[3]) .. "+" .. sig(t[4] % (math.pi * 2)) .. ")"
+								end
+							end
+						end
+					end
+					local conv2 = function(k)
+						for i=1, 4 do table.insert(MW_animatorProgressSave, sig(t[k][i])) end
+					end
+					if not (zero("x") and zero("y") and zero("z") and zero("rx") and zero("ry") and zero("rz")) then
+						x ..= `cfMul(cf({conv("x")},{conv("y")},{conv("z")}),angles({conv("rx", math.pi / 180)},{conv("ry", math.pi / 180)},{conv("rz", math.pi / 180)}))`
+					elseif not (zero("rx") and zero("ry") and zero("rz")) then
+						x ..= `angles({conv("rx", math.pi / 180)},{conv("ry", math.pi / 180)},{conv("rz", math.pi / 180)})`
+					elseif not (zero("x") and zero("y") and zero("z")) then
+						x ..= `cf({conv("x")},{conv("y")},{conv("z")})`
+					else
+						x ..= `cf()`
+					end
+					x ..= ",deltaTime)"
+					table.insert(MW_animatorProgressSave, n)
+					conv2("x") conv2("rx") conv2("y") conv2("ry") conv2("z") conv2("rz")
+					return x
+				end
+				local codegen = ""
+				codegen ..= apply("RootJoint") .. "\n"
+				codegen ..= apply("Neck") .. "\n"
+				codegen ..= apply("RightShoulder") .. "\n"
+				codegen ..= apply("LeftShoulder") .. "\n"
+				codegen ..= apply("RightHip") .. "\n"
+				codegen ..= apply("LeftHip") .. "\n"
+				codegen ..= "--MW_animatorProgressSave: " .. table.concat(MW_animatorProgressSave, ",")
+				setclipboard(codegen)
+			end)
+			btn("copy steve lerps to clipboard", function()
+				local MW_animatorProgressSave = {}
+				local function applyj(n, n2)
+					local x = `{n2} = `
+					local t = animatorcfg[n]
+					local zero = function(k)
+						if t[k][1] == 0 then
+							if t[k][3] == 0 and math.sin(t[k][4]) <= 0.005 then
+								return true
+							elseif t[k][2] == 0 then
+								return true
+							end
+						end
+						return false
+					end
+					local conv = function(k, mul)
+						local t = t[k]
+						if t[1] == 0 then
+							if t[2] == 0 then
+								return "0"
+							else
+								if t[3] == 0 then
+									return sig(t[2] * math.sin(t[4]) * mul)
+								elseif t[3] == 1 then
+									return sig(t[2] * mul) .. " * math.sin(timingsine + " .. sig(t[4] % (math.pi * 2)) .. ")"
+								elseif t[3] == -1 then
+									return sig(t[2] * mul) .. " * math.sin(" .. sig(t[4] % (math.pi * 2)) .. " - timingsine)"
+								else
+									return sig(t[2] * mul) .. " * math.sin(timingsine * " .. sig(t[3]) .. " + " .. sig(t[4] % (math.pi * 2)) .. ")"
+								end
+							end
+						else
+							if t[2] == 0 then
+								return "0"
+							else
+								if t[3] == 0 then
+									return sig(t[1] * mul + t[2] * math.sin(t[4]) * mul)
+								elseif t[3] == 1 then
+									return sig(t[1] * mul) .. " + " .. sig(t[2] * mul) .. " * math.sin(timingsine + " .. sig(t[4] % (math.pi * 2)) .. ")"
+								elseif t[3] == -1 then
+									return sig(t[1] * mul) .. " + " .. sig(t[2] * mul) .. " * math.sin(" .. sig(t[4] % (math.pi * 2)) .. " - timingsine)"
+								else
+									return sig(t[1] * mul) .. " + " .. sig(t[2] * mul) .. " * math.sin(timingsine * " .. sig(t[3]) .. " + " .. sig(t[4] % (math.pi * 2)) .. ")"
+								end
+							end
+						end
+					end
+					local conv2 = function(k)
+						for i=1, 4 do table.insert(MW_animatorProgressSave, sig(t[k][i])) end
+					end
+					if not (zero("x") and zero("y") and zero("z") and zero("rx") and zero("ry") and zero("rz")) then
+						x ..= `CFrame.new({conv("x")},{conv("y")},{conv("z")}) * CFrame.fromEulerAnglesXYZ({conv("rx", math.pi / 180)},{conv("ry", math.pi / 180)},{conv("rz", math.pi / 180)}))`
+					elseif not (zero("rx") and zero("ry") and zero("rz")) then
+						x ..= `CFrame.fromEulerAnglesXYZ({conv("rx", math.pi / 180)},{conv("ry", math.pi / 180)},{conv("rz", math.pi / 180)})`
+					elseif not (zero("x") and zero("y") and zero("z")) then
+						x ..= `CFrame.new({conv("x")},{conv("y")},{conv("z")})`
+					else
+						x ..= `CFrame.identity`
+					end
+					table.insert(MW_animatorProgressSave, n)
+					conv2("x") conv2("rx") conv2("y") conv2("ry") conv2("z") conv2("rz")
+					return x
+				end
+				local codegen = "animationOverride = function(timingsine, rt, nt, rst, lst, rht, lht)\n\t"
+				codegen ..= apply("RootJoint", "rt") .. "\n\t"
+				codegen ..= apply("Neck", "nt") .. "\n\t"
+				codegen ..= apply("RightShoulder", "rst") .. "\n\t"
+				codegen ..= apply("LeftShoulder", "lst") .. "\n\t"
+				codegen ..= apply("RightHip", "rht") .. "\n\t"
+				codegen ..= apply("LeftHip", "lht") .. "\n\treturn rt, nt, rst, lst, rht, lht, " .. sig(animatorcfg.speed) .. "\nend\n"
+				codegen ..= "--MW_animatorProgressSave: " .. table.concat(MW_animatorProgressSave, ",")
+				setclipboard(codegen)
+			end)
+		end)
 	end
 	m.LoadConfig = function(save: any)
 		m.AnimIndex = save.AnimIndex or m.AnimIndex
