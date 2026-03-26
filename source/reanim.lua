@@ -3078,6 +3078,7 @@ SaveData.NoPhysicsRepRootPart = not not SaveData.NoPhysicsRepRootPart
 SaveData.NetlessVelocity = SaveData.NetlessVelocity or 25.01
 SaveData.UsePatchmaLikeNetless = not not SaveData.UsePatchmaLikeNetless
 SaveData.UseAngularVelocity = not not SaveData.UseAngularVelocity
+SaveData.PatchmaVoidFloat = not not SaveData.PatchmaVoidFloat
 
 -- empyrean-like thing
 local _G_Uhhhhhh = {}
@@ -3105,6 +3106,7 @@ local Reanimate = {
 	SeatSit = not SaveData.NoSeatSitEnabled,
 	ToolGrab = SaveData.ToolGrabEnabled,
 	ScaleGravity = SaveData.ScaleGravityEnabled,
+	PatchmaVoidFloat = SaveData.PatchmaVoidFloat,
 	AntiExplosions = true,
 	CharacterScale = SaveData.CharacterScale,
 	P2PCollision = false,
@@ -3685,6 +3687,8 @@ Reanimate.CreateCharacter = function(InitCFrame)
 	local AnchorWeld = Instance.new("Weld")]]
 	RC.Parent = workspace
 	RCRootPart.CFrame = cf
+	local SafeY = cf.Y
+	local IsFloat = false
 	local SeatWeld = nil
 	local LastJumpOffSeat = 0
 	RCHumanoid.Touched:Connect(function(part, limb)
@@ -3783,15 +3787,41 @@ Reanimate.CreateCharacter = function(InitCFrame)
 			RCRootPart.RotVelocity = Vector3.zero
 		end
 		local safe = true
+		local void = true
 		for i=1, 8 do
 			local off = CFrame.Angles(0, (i / 4) * math.pi, 0):VectorToWorldSpace(Vector3.new(0, 0, -0.5))
-			if not workspace:Raycast(RCRootPart.Position + off, Vector3.new(0, -(3 * Reanimate.CharacterScale + 8 + RCHumanoid.HipHeight), 0), RCP) then
+			local r = workspace:Raycast(RCRootPart.Position + off, Vector3.new(0, -65536, 0), RCP)
+			if r then
+				void = false
+				if r.Distance > 3 * Reanimate.CharacterScale + 8 + RCHumanoid.HipHeight then
+					safe = false
+				end
+			else
 				safe = false
 			end
 		end
 		if safe then
 			LastSafest = RCRootPart.CFrame
 		end
+		if RCHumanoidState == "Running" or not void then
+			SafeY = RCRootPart.CFrame.Y
+			IsFloat = false
+		else
+			IsFloat = true
+		end
+	end))
+	Util.LinkDestroyI2C(RC, RunService.Heartbeat:Connect(function(dt)
+		local tcf, pos = RCRootPart.CFrame.Rotation, RCRootPart.CFrame.Position
+		if Reanimate.PatchmaVoidFloat and IsFloat then
+			pos = Vector3.new(pos.X, SafeY, pos.Z)
+			RCRootPart.Velocity *= Vector3.new(1, 0, 1)
+		end
+		if Reanimate:ShouldRotationType() then
+			local ax, ay, az = Reanimate.Camera.CFrame:ToEulerAngles(Enum.RotationOrder.YXZ)
+			local bx, by, bz = RCRootPart.CFrame:ToEulerAngles(Enum.RotationOrder.YXZ)
+			tcf = CFrame.fromEulerAngles(bx, ay, bz, Enum.RotationOrder.YXZ)
+		end
+		RCRootPart.CFrame = tcf + pos
 	end))
 	Reanimate.Character = RC
 	_G_Uhhhhhh.Character = RC
@@ -4387,12 +4417,6 @@ function LimbReanimator.Start()
 			end
 			if Character and Humanoid and RootPart then
 				RunService.Heartbeat:Wait()
-				if Reanimate:ShouldRotationType() then
-					local ax, ay, az = Camera.CFrame:ToEulerAngles(Enum.RotationOrder.YXZ)
-					local bx, by, bz = RCRootPart.CFrame:ToEulerAngles(Enum.RotationOrder.YXZ)
-					local tcf = CFrame.fromEulerAngles(bx, ay, bz, Enum.RotationOrder.YXZ)
-					RCRootPart.CFrame = tcf + RCRootPart.CFrame.Position
-				end
 				local t = os.clock()
 				local flingtarget = LimbReanimator.FlingTargets[1]
 				if flingtarget then
@@ -6330,12 +6354,6 @@ function HatReanimator.Start()
 				end
 			end
 			if RCRootPart then
-				if Reanimate:ShouldRotationType() then
-					local ax, ay, az = Camera.CFrame:ToEulerAngles(Enum.RotationOrder.YXZ)
-					local bx, by, bz = RCRootPart.CFrame:ToEulerAngles(Enum.RotationOrder.YXZ)
-					local tcf = CFrame.fromEulerAngles(bx, ay, bz, Enum.RotationOrder.YXZ)
-					RCRootPart.CFrame = tcf + RCRootPart.CFrame.Position
-				end
 				local rightarm = ReanimCharacter:FindFirstChild("Right Arm") or RCRootPart
 				local rightgrip = Util.ScaleCFrame(RIGHTGRIP_C0, Reanimate.CharacterScale)
 				local claimoverride = nil
@@ -6741,6 +6759,10 @@ do
 		Reanimate.ScaleGravity = val
 		SaveData.ScaleGravityEnabled = val
 	end)
+	UI.CreateSwitch(MainPage, "Void Float", Reanimate.PatchmaVoidFloat).Changed:Connect(function(val)
+		Reanimate.PatchmaVoidFloat = val
+		SaveData.PatchmaVoidFloat = val
+	end)
 	UI.CreateButton(MainPage, "Force Sit (2x to remove gyro)", 20).Activated:Connect(function()
 		local ch = Reanimate.Character or Player.Character
 		if ch then
@@ -6778,7 +6800,8 @@ do
 			local r = h and h.RootPart
 			if h and r then
 				r.CFrame = r.CFrame.Rotation + pos
-				r.Velocity = Vector3.new(0, 50, 0)
+				r.Velocity = Vector3.zero
+				r.RotVelocity = Vector3.zero
 			end
 		end
 	end
@@ -6850,7 +6873,7 @@ do
 			end
 		end
 		if _lastclick and _lastclick == input and not _lastclickgpe then
-			if os.clock() - _lastclicktick < 0.3 and (input.Position - _lastclickpos).Magnitude < 10 then
+			if input.UserInputType == Enum.UserInputType.MouseButton1 or (os.clock() - _lastclicktick < 0.3 and (input.Position - _lastclickpos).Magnitude < 10) then
 				if Reanimate.CtrlClick and HoldingCtrl.Value then
 					if Maus.Target and Maus.Target.Parent then
 						ReanimCharacterTeleport(Maus.Hit.Position + Vector3.new(0, 3, 0))

@@ -1475,7 +1475,7 @@ AddModule(function()
 			local prop = function(txt, a, b)
 				local fr = Instance.new("Frame")
 				fr.BackgroundTransparency = 1
-				fr.Size = UDim2.new(1, 0, 0, 20)
+				fr.Size = UDim2.new(1, 0, 0, 18)
 				fr.Name = RandomString()
 				fr.LayoutOrder = 67
 				fr.Parent = parent
@@ -1532,7 +1532,7 @@ AddModule(function()
 			local prop1 = function(txt, a)
 				local fr = Instance.new("Frame")
 				fr.BackgroundTransparency = 1
-				fr.Size = UDim2.new(1, 0, 0, 20)
+				fr.Size = UDim2.new(1, 0, 0, 18)
 				fr.Name = RandomString()
 				fr.LayoutOrder = 67
 				fr.Parent = parent
@@ -1573,7 +1573,7 @@ AddModule(function()
 			local txtbox = function(txt, func)
 				local fr = Instance.new("Frame")
 				fr.BackgroundTransparency = 1
-				fr.Size = UDim2.new(1, 0, 0, 20)
+				fr.Size = UDim2.new(1, 0, 0, 18)
 				fr.Name = RandomString()
 				fr.LayoutOrder = 67
 				fr.Parent = parent
