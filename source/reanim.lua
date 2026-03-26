@@ -826,7 +826,7 @@ end
 UISound.Click = Util.Instance("Sound", UIMainFrame)
 UISound.Click.SoundId = "rbxassetid://118806752369227"
 UISound.Click.Volume = 1
-UISound.Click.PlaybackSpeed = 2
+UISound.Click.PlaybackSpeed = 1
 if SaveData.MuteUISound then
 	UISound.Click.Volume = 0
 end
