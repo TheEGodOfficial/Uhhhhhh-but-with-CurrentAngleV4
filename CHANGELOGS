@@ -7,6 +7,8 @@
  - Added modules reloading
  - Added init logs, for debugging problems
  - Random fix i came up with to "reduce crashes", lets see how it goes
+ - Made the UI click less annoying
+ - Click Sound in themes
 # Version 1.0.5 BETA
  - Fixed Patchma-like netless, now it'll only be "jittery" when you move (like in the REAL)
  - RepRootPart property is now available for hat overrides! (hat orbit is now possible)
