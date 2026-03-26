@@ -3323,6 +3323,9 @@ do
 		UserInputService.TextBoxFocusReleased:Connect(resetInputDevices)
 		GuiService.MenuOpened:Connect(resetInputDevices)
 		RunService:BindToRenderStep("Uhhhhhh_Control", Enum.RenderPriority.Input.Value + 1, function(dt)
+			if UserInputService:GetFocusedTextBox() then
+				resetInputDevices()
+			end
 			local screensize = Util.GetScreenSize()
 			self.Move = Vector3.zero
 			if self.Inputs.KB.Up then
@@ -3404,7 +3407,7 @@ do
 				end
 			end
 			if input.UserInputType == Enum.UserInputType.MouseWheel then
-				if gpe and not self:IsMousePanning() then return end
+				if gpe then return end
 				local zoom = math.clamp(-input.Position.Z, -1, 1)
 				self:OnZoomInput(zoom)
 			end
@@ -3456,12 +3459,13 @@ do
 				self.Inputs.TC.Touch[input] = false
 			end
 		end)
-		UserInputService.PointerAction:Connect(function(wheel, pan, pinch, gpe)
+		-- causes issues for mac somehow
+		--[[UserInputService.PointerAction:Connect(function(wheel, pan, pinch, gpe)
 			if not gpe then
 				self:OnPanInput(pan * Vector2.new(1, 0.77) * math.rad(7), false)
 				self:OnZoomInput(-wheel - pinch)
 			end
-		end)
+		end)]]
 		local function resetInputDevices()
 			self.Inputs:Reset()
 		end
@@ -3510,6 +3514,9 @@ do
 			Reanimate.Shiftlocked = Reanimate.ShiftlockEnabled and not Reanimate.Shiftlocked
 		end)
 		RunService:BindToRenderStep("Uhhhhhh_Camera", Enum.RenderPriority.Camera.Value + 1, function(dt)
+			if UserInputService:GetFocusedTextBox() then
+				resetInputDevices()
+			end
 			if self.Inputs.KB.Left then
 				self:OnPanInput(Vector2.new(math.rad(-120) * dt, 0), true)
 			end
