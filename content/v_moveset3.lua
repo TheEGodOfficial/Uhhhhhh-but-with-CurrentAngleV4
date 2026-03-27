@@ -1570,7 +1570,7 @@ AddModule(function()
 				val.FocusLost:Connect(this)
 				table.insert(update, this)
 			end
-			local txtbox = function(txt, func)
+			local txtbox = function(txt, ptxt, func)
 				local fr = Instance.new("Frame")
 				fr.BackgroundTransparency = 1
 				fr.Size = UDim2.new(1, 0, 0, 18)
