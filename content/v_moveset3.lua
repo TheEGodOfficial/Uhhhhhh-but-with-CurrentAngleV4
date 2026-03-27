@@ -1338,7 +1338,7 @@ AddModule(function()
 					return t[1] + t[2] * math.sin((sine * animatorcfg.change + t[4]) * t[3])
 				end
 				local t = animatorcfg[n]
-				j.C0 = Lerp(cfMul(cf(a(t.x), a(t.y), a(t.z)), angles(math.rad(a(t.rx)), math.rad(a(t.ry)), math.rad(a(t.rz)))), j.C0, math.exp(-animatorcfg.speed * deltaTime))
+				j.C0 = Lerp(cfMul(cf(a(t.x), a(t.y), a(t.z)), angles(math.rad(a(t.rx)), math.rad(a(t.ry)), math.rad(a(t.rz)))), j.C0, math.exp(-animatorcfg.speed * deltaTime / 10))
 			end
 			t.addmode("default", {
 				idle=function()
@@ -1845,9 +1845,9 @@ AddModule(function()
 						table.insert(MW_animatorProgressSave, sig(t[k][3]))
 					end
 					if not (zero("x") and zero("y") and zero("z")) and not (zero("rx") and zero("ry") and zero("rz")) then
-						x ..= `CFrame.new({conv("x")}, {conv("y")}, {conv("z")}) * CFrame.fromEulerAnglesXYZ({conv("rx", math.pi / 180)}, {conv("ry", math.pi / 180)}, {conv("rz", math.pi / 180)}))`
+						x ..= `CFrame.new({conv("x")}, {conv("y")}, {conv("z")}) * CFrame.Angles({conv("rx", math.pi / 180)}, {conv("ry", math.pi / 180)}, {conv("rz", math.pi / 180)})`
 					elseif not (zero("rx") and zero("ry") and zero("rz")) then
-						x ..= `CFrame.fromEulerAnglesXYZ({conv("rx", math.pi / 180)}, {conv("ry", math.pi / 180)}, {conv("rz", math.pi / 180)})`
+						x ..= `CFrame.Angles({conv("rx", math.pi / 180)}, {conv("ry", math.pi / 180)}, {conv("rz", math.pi / 180)})`
 					elseif not (zero("x") and zero("y") and zero("z")) then
 						x ..= `CFrame.new({conv("x")}, {conv("y")}, {conv("z")})`
 					else

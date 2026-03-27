@@ -6992,6 +6992,18 @@ AddModule(function()
 			end
 			return rt, nt, rst, lst, rht, lht, 16
 		end,
+		flamethrow = function(timingsine, rt, nt, rst, lst, rht, lht)
+			rt = CFrame.Angles(-1.483, 0, 3.141)
+			nt = CFrame.new(0, 1, 0.1) * CFrame.Angles(-1.658, 0, 3.141)
+			rst = CFrame.new(1, 0.5 + 0.1 * math.sin(timingsine * 1.5), -0.2) * CFrame.Angles(1.832 + 0.087 * math.sin(timingsine * 9 + 1.349), 1.221 + 0.087 * math.sin(timingsine * 4 + 1.2), -0.349 + 0.087 * math.sin(timingsine * 16))
+			lst = CFrame.new(-1, 0.5 + 0.1 * math.sin(timingsine * 1.5), -0.2) * CFrame.fromEulerAnglesXYZ(1.832 + 0.087 * math.sin(timingsine * 9), -1.221 + 0.087 * math.sin(timingsine * 4 + 1.2), 0.349 + 0.087 * math.sin(timingsine * 16 + 2.4))
+			return rt, nt, rst, lst, rht, lht, 12
+		end,
+		bombthrow = function(timingsine, rt, nt, rst, lst, rht, lht)
+			rt = CFrame.Angles(-1.57, 0, 3.141 + -0.087 * math.sin(timingsine))
+			lst = CFrame.new(-1, 0.5 + 0.2 * math.sin(timingsine), 0.2 * math.sin(timingsine + 4.883)) * CFrame.fromEulerAnglesXYZ(0.349 + 1.57 * math.sin(timingsine), -1.57 + 0.349 * math.sin(timingsine + 4.883), 0)
+			return rt, nt, rst, lst, rht, lht, 20
+		end,
 	}
 	local function CreatePart(cf, size, color, material, transp, reflec)
 		local rng = Instance.new("Part", workspace)
@@ -7039,23 +7051,25 @@ AddModule(function()
 			MagicSphere(Vector3.one, 30, v.CFrame, Color3.new(1, 0, 0), Vector3.one * 0.15)
 		end
 	end
-	local function BootsEffect(part, typ)
+	local function BootsEffect(part, typ, thic, leng)
+		thic = thic or 1
+		leng = leng or 8
 		local COL = Color3.new(1, 0.5, 0)
 		local inf = part.CFrame:VectorToObjectSpace(part.Velocity / 60) * 0.9
-		local ground = PhysicsRaycast(part.CFrame * Vector3.new(0, -0.9 * scale, 0), part.CFrame.UpVector * -16)
-		local dist = ground and math.min(ground.Distance / 8, 1) or 1
+		local ground = PhysicsRaycast(part.CFrame * Vector3.new(0, -0.9 * scale, 0), part.CFrame.UpVector * -(8 + leng) * scale)
+		local dist = ground and math.min(ground.Distance / leng, 1) or 1
 		if typ == "IGNITION" then
 			MagicSphere(
 				Vector3.zero, 5, part.CFrame * CFrame.new(0, -1 * scale, 0), COL,
-				Vector3.new(2, 0.1, 2):Lerp(Vector3.new(2, 0.4, 2), dist) * scale,
-				Vector3.new(0, 0, 0):Lerp(Vector3.new(0, -0.4, 0), dist) * scale + inf
+				Vector3.new(2, 0.1, 2):Lerp(Vector3.new(2, 0.05 * leng, 2), dist) * scale,
+				Vector3.new(0, 0, 0):Lerp(Vector3.new(0, -0.05 * leng, 0), dist) * scale + inf
 			)
 		end
 		if typ == "THRUST" then
 			MagicSphere(
 				Vector3.one * scale, 10, part.CFrame * CFrame.new(0, -1 * scale, 0), COL,
-				Vector3.new(0.5, 0.1, 0.5):Lerp(Vector3.new(-0.1, 0.2, -0.1), dist) * scale,
-				Vector3.new(0, 0, 0):Lerp(Vector3.new(0, -0.4, 0), dist) * scale + inf
+				Vector3.new(0.5 * thic, 0.1, 0.5 * thic):Lerp(Vector3.new(thic - 1.1, 0.025 * leng, thic - 1.1), dist) * scale,
+				Vector3.new(0, 0, 0):Lerp(Vector3.new(0, -0.05 * leng, 0), dist) * scale + inf
 			)
 		end
 		if ground then
@@ -7235,7 +7249,12 @@ AddModule(function()
 			attacking = false
 		end)
 	end
+	local SecondaryMelee_isrunning = false
 	local function SecondaryMelee()
+		if SecondaryMelee_isrunning then
+			SecondaryMelee_isrunning = false
+			return
+		end
 		if not m.IgnoreDancing then
 			if isdancing then return end
 		end
@@ -7246,50 +7265,64 @@ AddModule(function()
 		PrimaryMelee_index = 0
 		if os.clock() - PrimaryMelee_lastatk > 1 then
 			randomdialog({
-				"Suppressing Threat...",
-				"Eliminating Target...",
+				"Incinerating Threat...",
+				"Burning Target...",
 				"Target Locking On...",
-				"Executing Ranged Protocol...",
-				"Distanced Combat In Progress...",
-				"Shot Fired"
+				"Executing Burn Protocol...",
+				"Close Combat In Progress...",
 			})
 		end
 		PrimaryMelee_lastatk = os.clock()
+		SecondaryMelee_isrunning = true
 		task.spawn(function()
 			animationOverride = function(timingsine, rt, nt, rst, lst, rht, lht)
-				rt, nt, rst, lst, rht, lht = lerps.punch(timingsine * math.pi * 8, rt, nt, rst, lst, rht, lht)
+				rt, nt, rst, lst, rht, lht = lerps.flamethrow(timingsine, rt, nt, rst, lst, rht, lht)
+				return rt, nt, rst, lst, rht, lht, 4
+			end
+			CreateSound("118325610335607")
+			local s = os.clock()
+			repeat
+				task.wait()
+				if not rootu:IsDescendantOf(workspace) then
+					SecondaryMelee_isrunning = false
+					return
+				end
+			until not SecondaryMelee_isrunning or os.clock() - s >= 0.75
+			if not SecondaryMelee_isrunning then
+				animationOverride = nil
+				attacking = false
+			end
+			animationOverride = function(timingsine, rt, nt, rst, lst, rht, lht)
+				rt, nt, rst, lst, rht, lht = lerps.flamethrow(timingsine, rt, nt, rst, lst, rht, lht)
 				return rt, nt, rst, lst, rht, lht, 30
 			end
-			task.wait(0.1)
-			if not rootu:IsDescendantOf(workspace) then
-				return
+			local larm, rarm = rootu.Parent:FindFirstChild("Left Arm") or rootu.Parent:FindFirstChild("Right Arm")
+			if larm and rarm then
+				BootsEffect(larm, "IGNITION", 3, 16)
+				BootsEffect(rarm, "IGNITION", 3, 16)
 			end
-			CreateSound("156572165")
-			CreateSound("130679953063646")
-			local target = MouseHit()
-			local hole = root.CFrame * CFrame.new(Vector3.new(1, 0.5, -5) * scale)
-			hole = HatReanimator.GetAttachmentCFrame(gun.Group .. "Attachment") or hole
-			local raycast = PhysicsRaycast(hole.Position, target - hole.Position)
-			if raycast then
-				target = raycast.Position
-			end
-			SetBulletState(hole.Position, target)
-			Attack(CFrame.lookAt((hole.Position + target) / 2, target), Vector3.new(3, 3, (target - hole.Position).Magnitude))
-			MagicSphere(Vector3.zero, 20, hole, Color3.new(1, 1, 0), Vector3.one * 0.3)
-			MagicSphere(Vector3.zero, 20, CFrame.new(target), Color3.new(1, 1, 0), Vector3.one * 0.3)
-			MagicSphere(Vector3.new(0, 0, (target - hole.Position).Magnitude), 10, CFrame.lookAt((hole.Position + target) / 2, target), Color3.new(1, 1, 0), Vector3.new(0.2, 0.2, 0))
-			animationOverride = function(timingsine, rt, nt, rst, lst, rht, lht)
-				rt, nt, rst, lst, rht, lht = lerps.shoot(-math.pi / 2, rt, nt, rst, lst, rht, lht)
-				AimTowards(target)
-				return rt, nt, rst, lst, rht, lht, 20
-			end
-			task.wait(0.1)
-			if not rootu:IsDescendantOf(workspace) then
-				return
+			s = os.clock()
+			repeat
+				if larm and rarm then
+					BootsEffect(larm, "THRUST", 3, 16)
+					BootsEffect(rarm, "THRUST", 3, 16)
+				end
+				Attack(rootu.CFrame * CFrame.new(0, 0, -5 * scale), Vector3.new(6, 5, 8) * scale)
+				task.wait()
+				if not rootu:IsDescendantOf(workspace) then
+					SecondaryMelee_isrunning = false
+					return
+				end
+			until not SecondaryMelee_isrunning or os.clock() - s >= 5.25
+			if not SecondaryMelee_isrunning then
+				animationOverride = nil
+				attacking = false
 			end
 			animationOverride = nil
 			attacking = false
 		end)
+	end
+	local function SecondaryRanged()
 	end
 	local function SwitchMode()
 		if not m.IgnoreDancing then
@@ -7387,7 +7420,7 @@ AddModule(function()
 		end, true, Enum.UserInputType.MouseButton1)
 		ContextActions:SetTitle("Uhhhhhh_BSPrime", "M1")
 		ContextActions:SetPosition("Uhhhhhh_BSPrime", UDim2.new(1, -130, 1, -130))
-		--[[ContextActions:BindAction("Uhhhhhh_BSSecon", function(_, state, _)
+		ContextActions:BindAction("Uhhhhhh_BSSecon", function(_, state, _)
 			if state == Enum.UserInputState.Begin then
 				if hasgun then
 					SecondaryRanged()
@@ -7397,7 +7430,7 @@ AddModule(function()
 			end
 		end, true, Enum.UserInputType.MouseButton1)
 		ContextActions:SetTitle("Uhhhhhh_BSSecon", "R")
-		ContextActions:SetPosition("Uhhhhhh_BSSecon", UDim2.new(1, -180, 1, -130))]]
+		ContextActions:SetPosition("Uhhhhhh_BSSecon", UDim2.new(1, -180, 1, -130))
 		ContextActions:BindAction("Uhhhhhh_BSHolst", function(_, state, _)
 			if state == Enum.UserInputState.Begin then
 				SwitchMode()

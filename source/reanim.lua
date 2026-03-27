@@ -3246,36 +3246,48 @@ Reanimate.Camera.IsMousePanning = function(self)
 	return self:IsMouseLocked() or self.Inputs.MS.RMB
 end
 do
+	local thumbstickAreaTopLeft = nil
+	local thumbstickAreaBottomRight = nil
+	local jumpButtonTopLeft = nil
+	local jumpButtonBottomRight = nil
+	local function IsInArea(pos, tl, br)
+		return pos.X >= tl.X and pos.Y >= tl.Y and pos.X <= br.X and pos.Y <= br.Y
+	end
 	local function IsInThumbstickArea(pos)
 		local playerGui = Player:FindFirstChildOfClass("PlayerGui")
-		if not playerGui then return end
-		local touchGui = playerGui:FindFirstChild("TouchGui")
-		if not touchGui or not touchGui.Enabled then
-			return false
+		if playerGui then
+			local touchGui = playerGui:FindFirstChild("TouchGui")
+			if touchGui and touchGui.Enabled then
+				local touchFrame = touchGui and touchGui:FindFirstChild("TouchControlFrame")
+				local thumbstickFrame = touchFrame and (touchFrame:FindFirstChild("DynamicThumbstickFrame") or touchFrame:FindFirstChild("ThumbstickFrame"))
+				if thumbstickFrame then
+					thumbstickAreaTopLeft = thumbstickFrame.AbsolutePosition
+					thumbstickAreaBottomRight = thumbstickAreaTopLeft + thumbstickFrame.AbsoluteSize
+				end
+			end
 		end
-		local touchFrame = touchGui and touchGui:FindFirstChild("TouchControlFrame")
-		local thumbstickFrame = touchFrame and (touchFrame:FindFirstChild("DynamicThumbstickFrame") or touchFrame:FindFirstChild("ThumbstickFrame"))
-		if not thumbstickFrame then
-			return false
+		if thumbstickAreaTopLeft and thumbstickAreaBottomRight then
+			return IsInArea(pos, thumbstickAreaTopLeft, thumbstickAreaBottomRight)
 		end
-		local posTopLeft = thumbstickFrame.AbsolutePosition
-		local posBottomRight = posTopLeft + thumbstickFrame.AbsoluteSize
-		return pos.X >= posTopLeft.X and pos.Y >= posTopLeft.Y and pos.X <= posBottomRight.X and pos.Y <= posBottomRight.Y
+		return false
 	end
 	local function IsInJumpButtonArea(pos)
 		local playerGui = Player:FindFirstChildOfClass("PlayerGui")
-		local touchGui = playerGui and playerGui:FindFirstChild("TouchGui")
-		if not touchGui or not touchGui.Enabled then
-			return false
+		if playerGui then
+			local touchGui = playerGui:FindFirstChild("TouchGui")
+			if touchGui and touchGui.Enabled then
+				local touchFrame = touchGui and touchGui:FindFirstChild("TouchControlFrame")
+				local jumpButton = touchFrame and touchFrame:FindFirstChild("JumpButton")
+				if jumpButton then
+					jumpButtonTopLeft = jumpButton.AbsolutePosition
+					jumpButtonBottomRight = jumpButtonTopLeft + jumpButton.AbsoluteSize
+				end
+			end
 		end
-		local touchFrame = touchGui and touchGui:FindFirstChild("TouchControlFrame")
-		local jumpButton = touchFrame and touchFrame:FindFirstChild("JumpButton")
-		if not jumpButton then
-			return false
+		if jumpButtonTopLeft and jumpButtonBottomRight then
+			return IsInArea(pos, jumpButtonTopLeft, jumpButtonBottomRight)
 		end
-		local posTopLeft = jumpButton.AbsolutePosition
-		local posBottomRight = posTopLeft + jumpButton.AbsoluteSize
-		return pos.X >= posTopLeft.X and pos.Y >= posTopLeft.Y and pos.X <= posBottomRight.X and pos.Y <= posBottomRight.Y
+		return false
 	end
 	do -- Control
 		local self = Reanimate.Control
@@ -3457,7 +3469,7 @@ do
 				end
 				if #touches == 1 then
 					if touches[1] == input then
-						self:OnPanInput(Vector2.new(input.Delta.X, input.Delta.Y) * Vector2.new(1, 0.66) * math.rad(1), false)
+						self:OnPanInput(Vector2.new(input.Delta.X, input.Delta.Y) * Vector2.new(1, 0.66) * math.rad(1), true)
 					end
 				end
 				if #touches == 2 then
@@ -7630,7 +7642,10 @@ do
 		end
 		return false
 	end
-	function ContextActions:OnInput(input)
+	function ContextActions:OnInput(input, gpe)
+		if input.UserInputType ~= Enum.UserInputType.Keyboard then
+			if gpe then return end
+		end
 		for i=#actions, 1, -1 do
 			local caac = actions[i]
 			local exec = false
@@ -7777,22 +7792,22 @@ do
 		buttonsui.Position = UDim2.fromOffset(pos.X - 35, pos.Y - 35)
 	end)
 end
-UserInputService.InputBegan:Connect(function(input)
+UserInputService.InputBegan:Connect(function(input, gpe)
 	if UserInputService:GetFocusedTextBox() then return end
 	if SaveData.KeybindsEnabled then
 		if input.UserInputType == Enum.UserInputType.Keyboard then
 			if HandleKeybind(input.KeyCode.Name) then return end
 		end
 	end
-	ContextActions:OnInput(input)
+	ContextActions:OnInput(input, gpe)
 end)
-UserInputService.InputChanged:Connect(function(input)
+UserInputService.InputChanged:Connect(function(input, gpe)
 	if UserInputService:GetFocusedTextBox() then return end
-	ContextActions:OnInput(input)
+	ContextActions:OnInput(input, gpe)
 end)
-UserInputService.InputEnded:Connect(function(input)
+UserInputService.InputEnded:Connect(function(input, gpe)
 	if UserInputService:GetFocusedTextBox() then return end
-	ContextActions:OnInput(input)
+	ContextActions:OnInput(input, gpe)
 end)
 
 if type(SaveData.ModuleConfigs) ~= "table" then
