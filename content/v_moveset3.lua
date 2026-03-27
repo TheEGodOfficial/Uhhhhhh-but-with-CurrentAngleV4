@@ -1335,7 +1335,7 @@ AddModule(function()
 			}
 			local function apply(n, j)
 				local function a(t)
-					return t[1] + t[2] * math.sin(sine * animatorcfg.change * t[3] + t[4])
+					return t[1] + t[2] * math.sin((sine * animatorcfg.change + t[4]) * t[3])
 				end
 				local t = animatorcfg[n]
 				j.C0 = Lerp(cfMul(cf(a(t.x), a(t.y), a(t.z)), angles(math.rad(a(t.rx)), math.rad(a(t.ry)), math.rad(a(t.rz)))), j.C0, math.exp(-animatorcfg.speed * deltaTime))
@@ -1608,7 +1608,7 @@ AddModule(function()
 					local v = animatorcfg[k]
 					for _,w in v do
 						w[3] /= 2
-						w[4] /= 2
+						w[4] *= 2
 					end
 				end
 				mmhm = "mmhm"
@@ -1620,7 +1620,7 @@ AddModule(function()
 					local v = animatorcfg[k]
 					for _,w in v do
 						w[3] *= 2
-						w[4] *= 2
+						w[4] /= 2
 					end
 				end
 				mmhm = "mmhm"
@@ -1734,13 +1734,13 @@ AddModule(function()
 								return "0"
 							else
 								if t[3] == 0 then
-									return sig(t[2] * math.sin(t[4]) * mul)
+									return "0"
 								elseif t[3] == 1 then
 									return sig(t[2] * mul) .. "*sin(sine+" .. sig(t[4] % (math.pi * 2)) .. ")"
 								elseif t[3] == -1 then
-									return sig(t[2] * mul) .. "*sin(" .. sig(t[4] % (math.pi * 2)) .. "-sine)"
+									return sig(t[2] * mul) .. "*sin(" .. sig(-t[4] % (math.pi * 2)) .. "-sine)"
 								else
-									return sig(t[2] * mul) .. "*sin(sine*" .. sig(t[3]) .. "+" .. sig(t[4] % (math.pi * 2)) .. ")"
+									return sig(t[2] * mul) .. "*sin(sine*" .. sig(t[3]) .. "+" .. sig((t[4] * t[3]) % (math.pi * 2)) .. ")"
 								end
 							end
 						else
@@ -1748,13 +1748,13 @@ AddModule(function()
 								return "0"
 							else
 								if t[3] == 0 then
-									return sig(t[1] * mul + t[2] * math.sin(t[4]) * mul)
+									return sig(t[1] * mul)
 								elseif t[3] == 1 then
 									return sig(t[1] * mul) .. "+" .. sig(t[2] * mul) .. "*sin(sine+" .. sig(t[4] % (math.pi * 2)) .. ")"
 								elseif t[3] == -1 then
-									return sig(t[1] * mul) .. "+" .. sig(t[2] * mul) .. "*sin(" .. sig(t[4] % (math.pi * 2)) .. "-sine)"
+									return sig(t[1] * mul) .. "+" .. sig(t[2] * mul) .. "*sin(" .. sig(-t[4] % (math.pi * 2)) .. "-sine)"
 								else
-									return sig(t[1] * mul) .. "+" .. sig(t[2] * mul) .. "*sin(sine*" .. sig(t[3]) .. "+" .. sig(t[4] % (math.pi * 2)) .. ")"
+									return sig(t[1] * mul) .. "+" .. sig(t[2] * mul) .. "*sin(sine*" .. sig(t[3]) .. "+" .. sig((t[4] * t[3]) % (math.pi * 2)) .. ")"
 								end
 							end
 						end
@@ -1811,13 +1811,13 @@ AddModule(function()
 								return "0"
 							else
 								if t[3] == 0 then
-									return sig(t[2] * math.sin(t[4]) * mul)
+									return "0"
 								elseif t[3] == 1 then
 									return sig(t[2] * mul) .. " * math.sin(timingsine + " .. sig(t[4] % (math.pi * 2)) .. ")"
 								elseif t[3] == -1 then
-									return sig(t[2] * mul) .. " * math.sin(" .. sig(t[4] % (math.pi * 2)) .. " - timingsine)"
+									return sig(t[2] * mul) .. " * math.sin(" .. sig(-t[4] % (math.pi * 2)) .. " - timingsine)"
 								else
-									return sig(t[2] * mul) .. " * math.sin(timingsine * " .. sig(t[3]) .. " + " .. sig(t[4] % (math.pi * 2)) .. ")"
+									return sig(t[2] * mul) .. " * math.sin(timingsine * " .. sig(t[3]) .. " + " .. sig((t[4] * t[3]) % (math.pi * 2)) .. ")"
 								end
 							end
 						else
@@ -1825,13 +1825,13 @@ AddModule(function()
 								return "0"
 							else
 								if t[3] == 0 then
-									return sig(t[1] * mul + t[2] * math.sin(t[4]) * mul)
+									return sig(t[1] * mul)
 								elseif t[3] == 1 then
 									return sig(t[1] * mul) .. " + " .. sig(t[2] * mul) .. " * math.sin(timingsine + " .. sig(t[4] % (math.pi * 2)) .. ")"
 								elseif t[3] == -1 then
-									return sig(t[1] * mul) .. " + " .. sig(t[2] * mul) .. " * math.sin(" .. sig(t[4] % (math.pi * 2)) .. " - timingsine)"
+									return sig(t[1] * mul) .. " + " .. sig(t[2] * mul) .. " * math.sin(" .. sig(-t[4] % (math.pi * 2)) .. " - timingsine)"
 								else
-									return sig(t[1] * mul) .. " + " .. sig(t[2] * mul) .. " * math.sin(timingsine * " .. sig(t[3]) .. " + " .. sig(t[4] % (math.pi * 2)) .. ")"
+									return sig(t[1] * mul) .. " + " .. sig(t[2] * mul) .. " * math.sin(timingsine * " .. sig(t[3]) .. " + " .. sig((t[4] * t[3]) % (math.pi * 2)) .. ")"
 								end
 							end
 						end
