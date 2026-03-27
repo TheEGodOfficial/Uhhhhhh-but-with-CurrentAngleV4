@@ -1766,7 +1766,7 @@ AddModule(function()
 						table.insert(MW_animatorProgressSave, sig(t[k][4]))
 						table.insert(MW_animatorProgressSave, sig(t[k][3]))
 					end
-					if not (zero("x") and zero("y") and zero("z") and zero("rx") and zero("ry") and zero("rz")) then
+					if not (zero("x") and zero("y") and zero("z")) and not (zero("rx") and zero("ry") and zero("rz")) then
 						x ..= `cfMul(cf({conv("x")},{conv("y")},{conv("z")}),angles({conv("rx", math.pi / 180)},{conv("ry", math.pi / 180)},{conv("rz", math.pi / 180)}))`
 					elseif not (zero("rx") and zero("ry") and zero("rz")) then
 						x ..= `angles({conv("rx", math.pi / 180)},{conv("ry", math.pi / 180)},{conv("rz", math.pi / 180)})`
@@ -1844,12 +1844,12 @@ AddModule(function()
 						table.insert(MW_animatorProgressSave, sig(t[k][4]))
 						table.insert(MW_animatorProgressSave, sig(t[k][3]))
 					end
-					if not (zero("x") and zero("y") and zero("z") and zero("rx") and zero("ry") and zero("rz")) then
-						x ..= `CFrame.new({conv("x")},{conv("y")},{conv("z")}) * CFrame.fromEulerAnglesXYZ({conv("rx", math.pi / 180)},{conv("ry", math.pi / 180)},{conv("rz", math.pi / 180)}))`
+					if not (zero("x") and zero("y") and zero("z")) and not (zero("rx") and zero("ry") and zero("rz")) then
+						x ..= `CFrame.new({conv("x")}, {conv("y")}, {conv("z")}) * CFrame.fromEulerAnglesXYZ({conv("rx", math.pi / 180)}, {conv("ry", math.pi / 180)}, {conv("rz", math.pi / 180)}))`
 					elseif not (zero("rx") and zero("ry") and zero("rz")) then
-						x ..= `CFrame.fromEulerAnglesXYZ({conv("rx", math.pi / 180)},{conv("ry", math.pi / 180)},{conv("rz", math.pi / 180)})`
+						x ..= `CFrame.fromEulerAnglesXYZ({conv("rx", math.pi / 180)}, {conv("ry", math.pi / 180)}, {conv("rz", math.pi / 180)})`
 					elseif not (zero("x") and zero("y") and zero("z")) then
-						x ..= `CFrame.new({conv("x")},{conv("y")},{conv("z")})`
+						x ..= `CFrame.new({conv("x")}, {conv("y")}, {conv("z")})`
 					else
 						x ..= `CFrame.identity`
 					end
