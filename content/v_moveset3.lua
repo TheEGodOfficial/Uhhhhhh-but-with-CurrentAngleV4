@@ -1335,7 +1335,7 @@ AddModule(function()
 			}
 			local function apply(n, j)
 				local function a(t)
-					return t[1] + t[2] * math.sin(sine * t[3] + t[4])
+					return t[1] + t[2] * math.sin(sine * animatorcfg.change * t[3] + t[4])
 				end
 				local t = animatorcfg[n]
 				j.C0 = Lerp(cfMul(cf(a(t.x), a(t.y), a(t.z)), angles(math.rad(a(t.rx)), math.rad(a(t.ry)), math.rad(a(t.rz)))), j.C0, math.exp(-animatorcfg.speed * deltaTime))
@@ -1465,6 +1465,7 @@ AddModule(function()
 			local lmao = function(k, t, i, mmhm)
 				if mmhm == "mmhm" then
 					k.Text = sig(t[i])
+					return
 				end
 				if #k.Text > 0 then
 					t[i] = tonumber(k.Text) or t[i]
@@ -1519,10 +1520,10 @@ AddModule(function()
 					lmao(soff, t, 4, mmhm)
 				end
 				this()
-				val.Changed:Connect(this)
-				sval.Changed:Connect(this)
-				smul.Changed:Connect(this)
-				soff.Changed:Connect(this)
+				val:GetPropertyChangedSignal("Text"):Connect(this)
+				sval:GetPropertyChangedSignal("Text"):Connect(this)
+				smul:GetPropertyChangedSignal("Text"):Connect(this)
+				soff:GetPropertyChangedSignal("Text"):Connect(this)
 				val.FocusLost:Connect(this)
 				sval.FocusLost:Connect(this)
 				smul.FocusLost:Connect(this)
@@ -1558,6 +1559,7 @@ AddModule(function()
 				local this = function(mmhm)
 					if mmhm == "mmhm" then
 						val.Text = sig(animatorcfg[a])
+						return
 					end
 					if #val.Text > 0 then
 						animatorcfg[a] = tonumber(val.Text) or animatorcfg[a]
@@ -1566,7 +1568,7 @@ AddModule(function()
 					val.Text = sig(animatorcfg[a])
 				end
 				this()
-				val.Changed:Connect(this)
+				val:GetPropertyChangedSignal("Text"):Connect(this)
 				val.FocusLost:Connect(this)
 				table.insert(update, this)
 			end
@@ -1596,7 +1598,7 @@ AddModule(function()
 				local val = lol("TextBox", 12, "")
 				val.PlaceholderText = ptxt
 				val.Size = UDim2.new(0, 195, 1, 0)
-				val.Changed:Connect(function()
+				val:GetPropertyChangedSignal("Text"):Connect(function()
 					func(val.Text)
 				end)
 			end
