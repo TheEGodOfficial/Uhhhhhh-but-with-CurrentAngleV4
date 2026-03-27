@@ -3160,7 +3160,7 @@ local Reanimate = {
 			end
 		end,
 		OnZoomInput = function(self, zoom)
-			self.Input = Vector3.new(self.Input.X, self.Input.Z, zoom)
+			self.Input = Vector3.new(self.Input.X, self.Input.Y, zoom)
 		end,
 		Inputs = {
 			KB = {
@@ -3436,7 +3436,7 @@ do
 				end
 				if #touches == 1 then
 					if touches[1] == input then
-						self:OnPanInput(Vector2.new(input.Delta.X, input.Delta.Y) * Vector2.new(1, 0.66) * math.rad(1), true)
+						self:OnPanInput(Vector2.new(input.Delta.X, input.Delta.Y) * Vector2.new(1, 0.66) * math.rad(1), false)
 					end
 				end
 				if #touches == 2 then
@@ -3537,6 +3537,8 @@ do
 			if self.Inputs.KB.Right then
 				self:OnPanInput(Vector2.new(math.rad(120) * dt, 0), true)
 			end
+			local input = self.Input * Vector3.new(1, GameSettings:GetCameraYInvertValue(), 1)
+			self.Input = Vector3.zero
 			local ltm = Reanimate.LocalTransparencyModifier
 			local tltm = 0
 			local sltm = dt * 3
@@ -3596,8 +3598,6 @@ do
 						local newCameraCFrame, newCameraFocus = self.CFrame, self.Focus
 						local subjectPosition = RootPart.Position + RootPart.CFrame.UpVector * 1.5
 						subjectPosition += RootPart.CFrame.Rotation * Humanoid.CameraOffset
-						local input = self.Input * Vector3.new(1, GameSettings:GetCameraYInvertValue(), 1)
-						self.Input = Vector3.zero
 						local zoomDelta = input.Z
 						if math.abs(zoomDelta) > 0 then
 							if zoomDelta > 0 then
