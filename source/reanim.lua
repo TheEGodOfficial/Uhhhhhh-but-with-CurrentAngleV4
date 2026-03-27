@@ -3840,7 +3840,7 @@ Reanimate.CreateCharacter = function(InitCFrame)
 		if safe then
 			LastSafest = RCRootPart.CFrame
 		end
-		if RCHumanoidState == "Running" or not void then
+		if RCHumanoidState == "Climbing" or not void then
 			SafeY = pos.Y
 			IsFloat = false
 		else
