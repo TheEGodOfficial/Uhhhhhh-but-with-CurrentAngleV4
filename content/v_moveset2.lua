@@ -7297,10 +7297,11 @@ AddModule(function()
 				rt, nt, rst, lst, rht, lht = lerps.flamethrow(timingsine, rt, nt, rst, lst, rht, lht)
 				return rt, nt, rst, lst, rht, lht, 4
 			end
-			local sound = Instance.new("Sound", torso)
+			local sound = Instance.new("Sound", rootu)
 			sound.SoundId = "rbxassetid://118325610335607"
 			sound.Volume = 10
 			sound.EmitterSize = 300
+			sound:Play()
 			local s = os.clock()
 			repeat
 				task.wait()
@@ -7371,7 +7372,7 @@ AddModule(function()
 		task.spawn(function()
 			local start = timingsine
 			animationOverride = function(timingsine, rt, nt, rst, lst, rht, lht)
-				rt, nt, rst, lst, rht, lht = lerps.shoot(timingsine - start, rt, nt, rst, lst, rht, lht)
+				rt, nt, rst, lst, rht, lht = lerps.bombthrow(timingsine - start, rt, nt, rst, lst, rht, lht)
 				AimTowards(MouseHit())
 				return rt, nt, rst, lst, rht, lht, 20
 			end
@@ -7381,7 +7382,7 @@ AddModule(function()
 			if not rootu:IsDescendantOf(workspace) then
 				return
 			end
-			local bombo = CreatePart(CFrame.identity, Vector3.one, Color3.new(1, 0, 0), "Plastic", 1, 0)
+			local bombo = CreatePart(CFrame.identity, Vector3.one, Color3.new(1, 0, 0), "Plastic", 0, 0)
 			local s = os.clock()
 			repeat
 				bombo.CFrame = larm.CFrame * CFrame.new(0, -1.5, 0)
