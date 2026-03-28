@@ -6639,7 +6639,7 @@ AddModule(function()
 	m.ModuleType = "MOVESET"
 	m.Name = "Banisher"
 	m.InternalName = "FIGHTERGUY"
-	m.Description = "hes tuff\nF - Holster/Unholster Gun\nLeft Ctrl - Run"
+	m.Description = "hes a very tuff CLANKER\nM1 - Primary Attack\nR - Secondary Attack\nF - Holster/Unholster Gun\nLeft Ctrl - Run"
 	m.Assets = {"BanisherTheme.mp3"}
 
 	m.Notifications = true

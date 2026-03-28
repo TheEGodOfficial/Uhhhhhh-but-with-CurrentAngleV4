@@ -3793,13 +3793,7 @@ Reanimate.CreateCharacter = function(InitCFrame)
 			RC:ScaleTo(Reanimate.CharacterScale)
 		end
 		local RCHumanoidState = RCHumanoid:GetState().Name
-		local clip = not table.find(noclipStates, RCHumanoidState)
 		local gravaff = not not table.find(fallingStates, RCHumanoidState)
-		for _,v in RC:GetChildren() do
-			if v:IsA("BasePart") then
-				v.CanCollide = clip or (not Reanimate.Noclip and v == RCRootPart)
-			end
-		end
 		if gravaff then
 			if Reanimate.ScaleGravity and not RCRootPart:IsGrounded() then
 				RCRootPart.AssemblyLinearVelocity += Vector3.new(0, -workspace.Gravity * (Reanimate.CharacterScale - 1) * 0.25 * dt, 0)
@@ -3830,6 +3824,15 @@ Reanimate.CreateCharacter = function(InitCFrame)
 			RCRootPart.CFrame = LastSafest
 			RCRootPart.Velocity = Vector3.new(0, 50, 0)
 			RCRootPart.RotVelocity = Vector3.zero
+		end
+	end))
+	Util.LinkDestroyI2C(RC, RunService.PreSimulation:Connect(function(dt)
+		local RCHumanoidState = RCHumanoid:GetState().Name
+		local clip = not table.find(noclipStates, RCHumanoidState)
+		for _,v in RC:GetChildren() do
+			if v:IsA("BasePart") then
+				v.CanCollide = clip or (not Reanimate.Noclip and v == RCRootPart)
+			end
 		end
 	end))
 	Util.LinkDestroyI2C(RC, RunService.PostSimulation:Connect(function(dt)
