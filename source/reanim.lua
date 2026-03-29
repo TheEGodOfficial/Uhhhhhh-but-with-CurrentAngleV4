@@ -4991,6 +4991,28 @@ function HatReanimator.Start()
 			p.CanQuery = false
 			p.Transparency = 0.75
 			p.Name = "(C) Uhhhhhh V" .. UhhhhhhVersion .. " :: HAT PLACEHOLDER"
+			for _,v in p:GetDescendants() do
+				if v:IsA("LuaSourceContainer") then
+					v:Destroy()
+					continue
+				end
+				local exist = pcall(function()
+					return v.LocalTransparencyModifier
+				end)
+				if exist then
+					table.insert(ltmparts, v)
+					local conn = nil
+					conn = v.AncestryChanged:Connect(function()
+						if not v:IsDescendantOf(RC) then
+							local i = table.find(ltmparts, v)
+							if i then
+								table.remove(ltmparts, i)
+							end
+							conn:Disconnect()
+						end
+					end)
+				end
+			end
 			p.Parent = workspace
 			return p
 		end
@@ -6669,7 +6691,7 @@ function HatReanimator.Start()
 				else
 					local tcf, _ = GetHatMappedCFrame(GetHatMappedOverride(ref.Map))
 					ph.CFrame = tcf
-					ph.Transparency = 1 - (1 - Reanimate.PlaceholderTransparency) * (1 - ltm) * (0.75 + math.sin(t) * 0.25)
+					ph.Transparency = 1 - (1 - Reanimate.PlaceholderTransparency) * (1 - ltm)
 					table.insert(slocked, ph)
 				end
 			end
