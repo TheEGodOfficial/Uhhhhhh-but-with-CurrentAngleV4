@@ -7797,7 +7797,7 @@ AddModule(function()
 		if gunspin then
 			gun.Offset = CFrame.new(0, -1, -0.5) * CFrame.Angles(0.8, math.pi / 2, 0) * CFrame.Angles((t * 50) % (2 * math.pi), 0, 0) * CFrame.Angles(math.rad(180), math.rad(180), 0)
 		else
-			gun.Offset = CFrame.new(0, -1, -0.5) * CFrame.Angles(math.rad(180), math.rad(180), 0)
+			gun.Offset = CFrame.new(0, -1, -0.5) * CFrame.Angles(math.rad(180), 0, 0)
 		end
 		gun.Disable = (not not isdancing) or not hasgun
 		
