@@ -657,7 +657,7 @@ AddModule(function()
 				part1.CFrame = part2.Upper.CFrame:Lerp(part2.Lower.CFrame, percent) * CFrame.new(0, -part1.Size.Y / 4, 0):Lerp(CFrame.new(0, part1.Size.Y / 4, 0), percent)
 			end
 
-			local step = RunService.Stepped:Connect(function()
+			local step = RunService.Stepped:Connect(function(dt)
 				hum.PlatformStand = true
 				if hum.MoveDirection.Magnitude > 0 or hum.Jump then
 					local acc = hum.MoveDirection * 16
@@ -666,7 +666,7 @@ AddModule(function()
 					end
 					for _,v in Ragdoll:GetDescendants() do
 						if v:IsA("BasePart") then
-							v.Velocity += acc * figure:GetScale() * 0.1
+							v.Velocity += acc * figure:GetScale() * dt * 6
 						end
 					end
 				end
