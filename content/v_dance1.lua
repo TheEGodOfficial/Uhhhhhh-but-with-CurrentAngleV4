@@ -238,7 +238,7 @@ AddModule(function()
 				Ragdoll.Name = "RagdollPhysics"
 				local customgravity = {}
 				local function _customgrav(part)
-					local f = Instance.new("Attachment", part)
+					local f = Instance.new("BodyForce", part)
 					f.Name = "Antigravity"
 					table.insert(customgravity, f)
 				end
