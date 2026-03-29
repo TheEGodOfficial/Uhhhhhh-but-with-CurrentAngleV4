@@ -531,6 +531,7 @@ AddModule(function()
 							end
 						end
 					end
+					print(IAmShocked)
 					if IAmShocked > 0 then
 						IAmShocked -= dt
 						for name,_ in Muscles do
