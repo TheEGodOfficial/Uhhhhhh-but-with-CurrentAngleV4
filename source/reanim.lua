@@ -5000,16 +5000,8 @@ function HatReanimator.Start()
 					return v.LocalTransparencyModifier
 				end)
 				if exist then
-					table.insert(ltmparts, v)
-					local conn = nil
-					conn = v.AncestryChanged:Connect(function()
-						if not v:IsDescendantOf(RC) then
-							local i = table.find(ltmparts, v)
-							if i then
-								table.remove(ltmparts, i)
-							end
-							conn:Disconnect()
-						end
+					p:GetPropertyChangedSignal("Transparency"):Connect(function()
+						v.LocalTransparencyModifier = p.Transparency
 					end)
 				end
 			end
