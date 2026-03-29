@@ -8636,7 +8636,7 @@ AddModule(function()
 			CFrame = CFrame.identity
 		}
 		table.insert(HatReanimator.HatCFrameOverride, sword)
-		table.insert(HatReanimator.HatCFrameOverride, gun)
+		table.insert(HatReanimator.HatCFrameOverride, rocket)
 		table.insert(HatReanimator.HatCFrameOverride, bullet)
 		createhatmap(LINKEDSWORD_HATMAP_BALL, superball)
 		createhatmap(LINKEDSWORD_HATMAP_BOMB, timebomb)
