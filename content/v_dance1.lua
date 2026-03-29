@@ -29,7 +29,7 @@ AddModule(function()
 
 	m.Mode = 0
 	m.Config = function(parent: GuiBase2d)
-		Util_CreateDropdown(parent, "Label", {"Normal", "Jointless", "CFrame Bug"}, m.Mode + 1).Changed:Connect(function(val)
+		Util_CreateDropdown(parent, "Type", {"Normal", "Jointless", "CFrame Bug", "\"Realistic\""}, m.Mode + 1).Changed:Connect(function(val)
 			m.Mode = val - 1
 		end)
 	end
@@ -42,78 +42,61 @@ AddModule(function()
 		}
 	end
 
-	local motors = {}
-	local joints = {}
+	local cleanupeverything = nil
 	local teleporthack = nil
-	local selmode = 0
-	m.Init = function(figure: Model)
-		table.clear(motors)
-		table.clear(joints)
-		if teleporthack then teleporthack:Disconnect() end
-		
-		local root = figure:FindFirstChild("HumanoidRootPart")
-		if not root then return end
-		local torso = figure:FindFirstChild("Torso")
-		if not torso then return end
-		
-		selmode = m.Mode
-		
-		local scale = figure:GetScale()
-		
-		local rj = root:FindFirstChild("RootJoint")
-		local nj = torso:FindFirstChild("Neck")
-		local rsj = torso:FindFirstChild("Right Shoulder")
-		local lsj = torso:FindFirstChild("Left Shoulder")
-		local rhj = torso:FindFirstChild("Right Hip")
-		local lhj = torso:FindFirstChild("Left Hip")
-		
-		local function createNoCollide(p0, p1)
-			local nocoll = Instance.new("NoCollisionConstraint")
-			nocoll.Name = p0.Name .. " To " .. p1.Name
-			nocoll.Part0, nocoll.Part1 = p0, p1
-			nocoll.Parent = p0
-			table.insert(joints, nocoll)
-		end
-		local function createJoint(motor, c0, c1)
-			motor.Enabled = false
-			local att0 = Instance.new("Attachment")
-			att0.Name = motor.Part0.Name .. "C0"
-			att0.CFrame = c0 + c0.Position * (scale - 1)
-			att0.Parent = motor.Part0
-			local att1 = Instance.new("Attachment")
-			att1.Name = motor.Part1.Name .. "C1"
-			att1.CFrame = c1 + c1.Position * (scale - 1)
-			att1.Parent = motor.Part1
-			local joint = Instance.new("BallSocketConstraint")
-			joint.Name = motor.Name
-			joint.Attachment0, joint.Attachment1 = att0, att1
-			joint.Parent = motor.Parent
-			joint.LimitsEnabled = true
-			joint.TwistLimitsEnabled = true
-			joint.UpperAngle = 90
-			joint.TwistLowerAngle = -170
-			joint.TwistUpperAngle = 170
-			createNoCollide(motor.Part0, motor.Part1)
-			table.insert(motors, motor)
-			table.insert(joints, att0)
-			table.insert(joints, att1)
-			table.insert(joints, joint)
-		end
-		
-		if selmode == 1 then
-			rj.Enabled = false
-			nj.Enabled = false
-			rsj.Enabled = false
-			lsj.Enabled = false
-			rhj.Enabled = false
-			lhj.Enabled = false
-			table.insert(motors, rj)
-			table.insert(motors, nj)
-			table.insert(motors, rsj)
-			table.insert(motors, lsj)
-			table.insert(motors, rhj)
-			table.insert(motors, lhj)
-		else
+
+	local Ragdolls Ragdolls = {
+		function(figure)
+			local hum = figure:FindFirstChildOfClass("Humanoid")
+			if not hum then return end
+			local root = figure:FindFirstChild("HumanoidRootPart")
+			if not root then return end
+			local torso = figure:FindFirstChild("Torso")
+			if not torso then return end
+			local scale = figure:GetScale()
+			
+			local rj = root:FindFirstChild("RootJoint")
+			local nj = torso:FindFirstChild("Neck")
+			local rsj = torso:FindFirstChild("Right Shoulder")
+			local lsj = torso:FindFirstChild("Left Shoulder")
+			local rhj = torso:FindFirstChild("Right Hip")
+			local lhj = torso:FindFirstChild("Left Hip")
+
+			local motors, joints = {}, {}
+			
+			local function createNoCollide(p0, p1)
+				local nocoll = Instance.new("NoCollisionConstraint")
+				nocoll.Name = p0.Name .. " To " .. p1.Name
+				nocoll.Part0, nocoll.Part1 = p0, p1
+				nocoll.Parent = p0
+				table.insert(joints, nocoll)
+			end
+			local function createJoint(motor, c0, c1)
+				motor.Enabled = false
+				local att0 = Instance.new("Attachment")
+				att0.Name = motor.Part0.Name .. "C0"
+				att0.CFrame = c0 + c0.Position * (scale - 1)
+				att0.Parent = motor.Part0
+				local att1 = Instance.new("Attachment")
+				att1.Name = motor.Part1.Name .. "C1"
+				att1.CFrame = c1 + c1.Position * (scale - 1)
+				att1.Parent = motor.Part1
+				local joint = Instance.new("BallSocketConstraint")
+				joint.Name = motor.Name
+				joint.Attachment0, joint.Attachment1 = att0, att1
+				joint.Parent = motor.Parent
+				joint.LimitsEnabled = true
+				joint.TwistLimitsEnabled = true
+				joint.UpperAngle = 90
+				joint.TwistLowerAngle = -170
+				joint.TwistUpperAngle = 170
+				createNoCollide(motor.Part0, motor.Part1)
+				table.insert(motors, motor)
+				table.insert(joints, att0)
+				table.insert(joints, att1)
+				table.insert(joints, joint)
+			end
+
 			root.CFrame = torso.CFrame
 			rj.Enabled = false
 			table.insert(motors, rj)
@@ -139,6 +122,18 @@ AddModule(function()
 			createNoCollide(root, lsj.Part1)
 			createNoCollide(root, rhj.Part1)
 			createNoCollide(root, lhj.Part1)
+
+			local step = RunService.Heartbeat:Connect(function()
+				hum.PlatformStand = true
+				if hum.MoveDirection.Magnitude > 0 or hum.Jump then
+					local acc = hum.MoveDirection * 16
+					if hum.Jump then
+						acc += Vector3.new(0, 16, 0)
+					end
+					root.Velocity = acc * figure:GetScale()
+				end
+			end)
+
 			teleporthack = root:GetPropertyChangedSignal("CFrame"):Connect(function()
 				local cf = root.CFrame
 				for _,v in {nj, rsj, lsj, rhj, lhj} do
@@ -147,54 +142,549 @@ AddModule(function()
 					end
 				end
 			end)
-		end
-	end
-	m.Update = function(dt: number, figure: Model)
-		local t = os.clock()
-		local hum = figure:FindFirstChild("Humanoid")
-		if not hum then return end
-		local root = figure:FindFirstChild("HumanoidRootPart")
-		if not root then return end
-		hum.PlatformStand = true
-		if selmode ~= 1 then
-			if hum.MoveDirection.Magnitude > 0 or hum.Jump then
-				local acc = hum.MoveDirection * 16
-				if hum.Jump then
-					acc += Vector3.new(0, 16, 0)
+
+			cleanupeverything = function()
+				step:Disconnect()
+				for _,v in motors do
+					v.Enabled = true
 				end
-				root.Velocity = acc * figure:GetScale()
-			end
-		end
-		if selmode == 1 then
-			local he = figure:FindFirstChild("Head")
-			local la = figure:FindFirstChild("Left Arm")
-			local ra = figure:FindFirstChild("Right Arm")
-			local ll = figure:FindFirstChild("Left Leg")
-			local rl = figure:FindFirstChild("Right Leg")
-			for _,v in {he, la, ra, ll, rl} do
-				if v.Position.Y < FallenPartsDestroyHeight then
-					v.Position = root.Position
+				for _,v in joints do
+					v:Destroy()
 				end
 			end
-		end
-		if selmode == 2 then
-			local he = figure:FindFirstChild("Head")
-			local la = figure:FindFirstChild("Left Arm")
-			local ra = figure:FindFirstChild("Right Arm")
-			local ll = figure:FindFirstChild("Left Leg")
-			local rl = figure:FindFirstChild("Right Leg")
-			RunService.PreSimulation:Once(function()
+		end,
+		function(figure)
+			local hum = figure:FindFirstChildOfClass("Humanoid")
+			if not hum then return end
+			local root = figure:FindFirstChild("HumanoidRootPart")
+			if not root then return end
+			local torso = figure:FindFirstChild("Torso")
+			if not torso then return end
+
+			local rj = root:FindFirstChild("RootJoint")
+			local nj = torso:FindFirstChild("Neck")
+			local rsj = torso:FindFirstChild("Right Shoulder")
+			local lsj = torso:FindFirstChild("Left Shoulder")
+			local rhj = torso:FindFirstChild("Right Hip")
+			local lhj = torso:FindFirstChild("Left Hip")
+
+			local motors = {}
+
+			table.insert(motors, rj)
+			table.insert(motors, nj)
+			table.insert(motors, rsj)
+			table.insert(motors, lsj)
+			table.insert(motors, rhj)
+			table.insert(motors, lhj)
+
+			for _,v in motors do
+				v.Enabled = false
+			end
+
+			local step = RunService.Heartbeat:Connect(function()
+				hum.PlatformStand = true
+				local he = figure:FindFirstChild("Head")
+				local la = figure:FindFirstChild("Left Arm")
+				local ra = figure:FindFirstChild("Right Arm")
+				local ll = figure:FindFirstChild("Left Leg")
+				local rl = figure:FindFirstChild("Right Leg")
+				for _,v in {he, la, ra, ll, rl} do
+					if v and v.Position.Y < FallenPartsDestroyHeight then
+						v.Position = root.Position
+					end
+				end
+			end)
+
+			cleanupeverything = function()
+				step:Disconnect()
+				for _,v in motors do
+					v.Enabled = true
+				end
+			end
+		end,
+		function(figure)
+			-- DEPENDENCY
+			Ragdolls[1](figure)
+			local step = RunService.PreSimulation:Connect(function()
+				local root = figure:FindFirstChild("HumanoidRootPart")
+				local he = figure:FindFirstChild("Head")
+				local la = figure:FindFirstChild("Left Arm")
+				local ra = figure:FindFirstChild("Right Arm")
+				local ll = figure:FindFirstChild("Left Leg")
+				local rl = figure:FindFirstChild("Right Leg")
 				he.CFrame, la.CFrame, ra.CFrame, ll.CFrame, rl.CFrame = root.CFrame, root.CFrame, root.CFrame, root.CFrame, root.CFrame
 			end)
-		end
+			local old = cleanupeverything
+			cleanupeverything = function()
+				step:Disconnect()
+				old()
+			end
+		end,
+		function(figure)
+			local hum = figure:FindFirstChildOfClass("Humanoid")
+			if not hum then return end
+			local root = figure:FindFirstChild("HumanoidRootPart")
+			if not root then return end
+			local torso = figure:FindFirstChild("Torso")
+			if not torso then return end
+
+			-- 2024 STEVE wrote this function, credits to him
+			local function CreateRagdoll(cframe)
+				local Vec121 = Vector3.new(0.8, 2, 0.8)
+				local Model = Instance.new("Model")
+				Model.Name = "PhoriaModel"
+				local Ragdoll = Instance.new("Model")
+				Ragdoll.Name = "RagdollPhysics"
+				local function _muscle(part1, part2, pivotcf, lup, llw, aup, alw)
+					local a0 = Instance.new("Attachment", part1)
+					a0.Name = "MuscleAttachment"
+					a0.WorldCFrame = pivotcf
+					local a1 = Instance.new("Attachment", part2)
+					a1.Name = "MuscleAttachment"
+					a1.WorldCFrame = pivotcf
+					local joint = Instance.new("CylindricalConstraint", Ragdoll)
+					joint.Name = "Muscle"
+					joint.Attachment0 = a0
+					joint.Attachment1 = a1
+					joint.LimitsEnabled = true
+					joint.UpperLimit = lup
+					joint.LowerLimit = llw
+					joint.ActuatorType = Enum.ActuatorType.Servo
+					joint.LinearResponsiveness = 200
+					joint.ServoMaxForce = 0
+					joint.Speed = 1
+					joint.TargetPosition = 0
+					joint.AngularLimitsEnabled = true
+					joint.UpperAngle = aup
+					joint.LowerAngle = alw
+					joint.AngularActuatorType = Enum.ActuatorType.Servo
+					joint.AngularResponsiveness = 200
+					joint.ServoMaxTorque = 0
+					joint.AngularSpeed = 11.25
+					joint.TargetAngle = 0
+					local nocoll = Instance.new("NoCollisionConstraint", part1)
+					nocoll.Part1 = part1
+					nocoll.Part0 = part2
+					nocoll.Name = "NoCollision"
+					return joint, {
+						SetStrength = function(st: number)
+							joint.ServoMaxForce = joint.Speed * 24 * st
+							joint.ServoMaxTorque = joint.AngularSpeed * 24 * st
+						end,
+						SetCFrame = function(cf: CFrame)
+							joint.TargetPosition = cf.X
+							local x, _, _ = cf:ToEulerAnglesXYZ()
+							joint.TargetAngle = -math.deg(x)
+						end,
+					}
+				end
+				local function _ball(part1, part2, pivotcf)
+					local a0 = Instance.new("Attachment", part1)
+					a0.Name = "BallAttachment"
+					a0.WorldCFrame = pivotcf
+					local a1 = Instance.new("Attachment", part2)
+					a1.Name = "BallAttachment"
+					a1.WorldCFrame = pivotcf
+					local joint = Instance.new("BallSocketConstraint", part1)
+					joint.Name = "Ball"
+					joint.Attachment0 = a0
+					joint.Attachment1 = a1
+					local nocoll = Instance.new("NoCollisionConstraint", part1)
+					nocoll.Part1 = part1
+					nocoll.Part0 = part2
+					nocoll.Name = "NoCollision"
+					return joint
+				end
+				local function _muscleball(part1, part2, pivotcf, angledata)
+					local p0 = Instance.new("Part", part1)
+					p0.Name = "BallPart"
+					p0.CFrame = pivotcf
+					p0.CanCollide = false
+					p0.CanTouch = false
+					p0.CanQuery = false
+					p0.Size = Vector3.one
+					p0.Transparency = 1
+					p0.Massless = true
+					local p1 = p0:Clone()
+					p1.Parent = part2
+					local j1, j1m = _muscle(part1, p0, pivotcf, unpack(angledata[1]))
+					local j2, j2m = _muscle(p0, p1, pivotcf * CFrame.Angles(0, 0, math.pi * 0.5), unpack(angledata[2]))
+					local j3, j3m = _muscle(p1, part2, pivotcf * CFrame.Angles(0, math.pi * -0.5, 0), unpack(angledata[3]))
+					local nocoll = Instance.new("NoCollisionConstraint", part1)
+					nocoll.Part1 = part1
+					nocoll.Part0 = part2
+					nocoll.Name = "NoCollision"
+					return {
+						SetStrength = function(st: number)
+							j1m.SetStrength(st)
+							j2m.SetStrength(st)
+							j3m.SetStrength(st)
+						end,
+						SetCFrame = function(cf: CFrame)
+							j1.TargetPosition = cf.X
+							j2.TargetPosition = cf.Y
+							j3.TargetPosition = cf.Z
+							local x, y, z = cf:ToEulerAnglesXYZ()
+							j1.TargetAngle = -math.deg(x)
+							j2.TargetAngle = -math.deg(y)
+							j3.TargetAngle = -math.deg(z)
+						end,
+					}
+				end
+				local function _limbin2parts(name, cf, size, angledata)
+					local limb = Instance.new("Model", Ragdoll)
+					limb.Name = name
+					local upper = Instance.new("Part", limb)
+					upper.Name = "Upper"
+					upper.CFrame = cf * CFrame.new(0, size.Y / 4, 0)
+					upper.Size = Vector3.new(size.X, size.Y / 2, size.Z)
+					local lower = Instance.new("Part", limb)
+					lower.Name = "Lower"
+					lower.CFrame = cf * CFrame.new(0, -size.Y / 4, 0)
+					lower.Size = upper.Size
+					local jointm = _muscleball(upper, lower, cf, angledata)
+					return limb, jointm
+				end
+				local head = Instance.new("Part", Ragdoll)
+				head.Name = "Head"
+				head.CFrame = cframe * CFrame.new(0, 1.5, 0)
+				head.Size = Vector3.new(1, 1, 1)
+				local torso, torsom = _limbin2parts("Torso", cframe, Vector3.new(2, 2, 1), {
+					{0, 0, -20, 45},
+					{0, 0, -35, 35},
+					{0, 0, -30, 30}
+				})
+				local neckm = _muscleball(head, torso.Upper, cframe * CFrame.new(0, 1, 0), {
+					{0, 0, -85, 45},
+					{0, 0, -45, 45},
+					{0, 0, -80, 80}
+				})
+				local larm, larmm = _limbin2parts("Left Arm", cframe * CFrame.new(-1.5, 0, 0), Vec121, {
+					{0, 0, 0, 135},
+					{0, 0, 0, 0},
+					{0, 0, 0, 0}
+				})
+				local lshom = _muscleball(larm.Upper, torso.Upper, cframe * CFrame.new(-1, 0.375, 0), {
+					{-0.1, 0.1, -170, 170},
+					{-0.1, 0.1, -120, 120},
+					{-0.1, 0.1, -120, 120}
+				})
+				local rarm, rarmm = _limbin2parts("Right Arm", cframe * CFrame.new(1.5, 0, 0), Vec121, {
+					{0, 0, 0, 135},
+					{0, 0, 0, 0},
+					{0, 0, 0, 0}
+				})
+				local rshom = _muscleball(rarm.Upper, torso.Upper, cframe * CFrame.new(1, 0.375, 0), {
+					{-0.1, 0.1, -170, 170},
+					{-0.1, 0.1, -120, 120},
+					{-0.1, 0.1, -120, 120}
+				})
+				local lleg, llegm = _limbin2parts("Left Leg", cframe * CFrame.new(-0.5, -2, 0), Vec121, {
+					{0, 0, -135, 0},
+					{0, 0, 0, 0},
+					{0, 0, 0, 0}
+				})
+				local lhipm = _muscleball(lleg.Upper, torso.Lower, cframe * CFrame.new(-0.5, -1, 0), {
+					{0, 0, -135, 135},
+					{0, 0, -50, 50},
+					{0, 0, -50, 50}
+				})
+				local rleg, rlegm = _limbin2parts("Right Leg", cframe * CFrame.new(0.5, -2, 0), Vec121, {
+					{0, 0, -135, 0},
+					{0, 0, 0, 0},
+					{0, 0, 0, 0}
+				})
+				local rhipm = _muscleball(rleg.Upper, torso.Lower, cframe * CFrame.new(0.5, -1, 0), {
+					{0, 0, -135, 135},
+					{0, 0, -50, 50},
+					{0, 0, -50, 50}
+				})
+				local Muscles = {
+					Neck = neckm,
+					Waist = torsom,
+					LeftShoulder = lshom,
+					RightShoulder = rshom,
+					LeftElbow = larmm,
+					RightElbow = rarmm,
+					LeftHip = lhipm,
+					RightHip = rhipm,
+					LeftKnee = llegm,
+					RightKnee = rlegm,
+				}
+				-- Ragdoll but with consciousness...somehow...????
+				local Phoria = {}
+				Phoria.Muscles = Muscles
+				Phoria.Strength = 1
+				Phoria._Strength = 1
+				for _,v in Ragdoll:GetDescendants() do
+					if v:IsA("BasePart") then
+						if v.Name == "BallPart" then
+							v.CustomPhysicalProperties = PhysicalProperties.new(0.1, 0, 0, 0, 0)
+						else
+							v.CustomPhysicalProperties = PhysicalProperties.new(0.2, 0.8, 0.1, 5, 3)
+						end
+					end
+				end
+				Ragdoll.Parent = Model
+				Phoria.Teleport = function(newcf)
+					local root = torso:FindFirstChild("Upper")
+					if root == nil then
+						StepEvent:Disconnect()
+						return
+					end
+					local rootcf = root.CFrame
+					local offset = newcf * CFrame.new(0, 0.5, 0)
+					for _,v in Ragdoll:GetDescendants() do
+						if v:IsA("BasePart") then
+							v.CFrame = offset * rootcf:ToObjectSpace(v.CFrame)
+						end
+					end
+				end
+				local TotalRuntime = 0
+				local FearOfHeights = {}
+				local TimeOfTheFear = 0
+				local TimeOfFalling = 0
+				local IAmShocked = 0
+				local StrengthSmoothing = 0
+				local RCP = RaycastParams.new()
+				RCP.RespectCanCollide = true
+				RCP.FilterType = Enum.RaycastFilterType.Exclude
+				RCP.FilterDescendantsInstances = {Model}
+				local function Raycast(from, dir)
+					return workspace:Raycast(from, dir, RCP)
+				end
+				local AnimSmoother = {}
+				local function OnPartImpact(v, other)
+					local resistance = 8
+					if v.Name == "Head" then
+						resistance = 2
+					end
+					if v.Parent.Name == "Torso" then
+						resistance = 4
+					end
+					local defense = 4 * resistance
+					local impulse = (other.Velocity - v.Velocity).Magnitude
+					if impulse > defense then
+						local dmg = (impulse - defense) / resistance
+						Phoria._Strength *= 1 / (dmg + 1)
+						IAmShocked = math.min(0.1, IAmShocked + dmg / 32)
+						for name,_ in Muscles do
+							FearOfHeights[name] = CFrame.new(
+								math.random() - 0.5,
+								math.random() - 0.5,
+								math.random() - 0.5
+							) * CFrame.Angles(
+								(math.random() - 0.5) * math.pi * 4,
+								(math.random() - 0.5) * math.pi * 4,
+								(math.random() - 0.5) * math.pi * 4
+							)
+						end
+					end
+				end
+				local LastImpulse = 0
+				local StepEvent = nil
+				StepEvent = RunService.Stepped:Connect(function(_, dt)
+					TotalRuntime += dt
+					local StrengthOverride = Model:GetAttribute("Strength")
+					if StrengthOverride ~= nil then
+						Phoria.Strength = StrengthOverride
+					end
+					Phoria.Strength = Phoria.Strength or 1
+					Phoria._Strength = Phoria._Strength or 1
+					if Phoria._Strength < 1 then
+						Phoria._Strength = math.min(1, Phoria._Strength + dt * 0.5)
+					end
+					local strength = Phoria.Strength * Phoria._Strength
+					local anim = {}
+					local root = torso:FindFirstChild("Lower")
+					if root == nil then
+						StepEvent:Disconnect()
+						return
+					end
+					local scale = Model:GetScale()
+					local rootcf = root.CFrame
+					local realvelocity = root.Velocity / scale
+					local velocity = rootcf:VectorToObjectSpace(realvelocity)
+					if Raycast(rootcf.Position, (Vector3.new(0, -5, 0) + realvelocity * 0.2) * scale) == nil then
+						TimeOfFalling += dt * 4
+					else
+						TimeOfFalling = 0
+					end
+					for _,v in Ragdoll:GetDescendants() do
+						if v:IsA("BasePart") and v.CanCollide then
+							local check = Raycast(v.Position, v.Velocity / 15)
+							if check ~= nil then
+								OnPartImpact(v, check.Instance)
+							end
+						end
+					end
+					if IAmShocked > 0 then
+						IAmShocked -= dt
+						for name,_ in Muscles do
+							if table.find({
+								"Waist", "LeftShoulder", "RightShoulder", "LeftHip", "RightHip"
+							}, name) ~= nil then return end
+							if FearOfHeights[name] == nil then
+								FearOfHeights[name] = CFrame.new(
+									math.random() - 0.5,
+									math.random() - 0.5,
+									math.random() - 0.5
+								) * CFrame.Angles(
+									(math.random() - 0.5) * math.pi * 4,
+									(math.random() - 0.5) * math.pi * 4,
+									(math.random() - 0.5) * math.pi * 4
+								)
+							end
+							anim[name] = FearOfHeights[name]
+						end
+					else
+						strength *= math.min(1, velocity.Magnitude / 64)
+						anim.Neck = CFrame.Angles(math.rad(-45), 0, 0)
+						anim.Waist = CFrame.Angles(math.rad(-45), 0, 0)
+						anim.LeftShoulder = CFrame.new(0.1, 0, -0.1) * CFrame.Angles(math.rad(60), math.rad(-30), 0)
+						anim.RightShoulder = CFrame.new(-0.1, 0, -0.1) * CFrame.Angles(math.rad(60), math.rad(30), 0)
+						anim.LeftElbow = CFrame.Angles(math.rad(-90), 0, 0)
+						anim.RightElbow = CFrame.Angles(math.rad(-90), 0, 0)
+						anim.LeftHip = CFrame.Angles(math.rad(110), math.rad(-10), 0)
+						anim.RightHip = CFrame.Angles(math.rad(110), math.rad(10), 0)
+						anim.LeftKnee = CFrame.Angles(math.rad(90), 0, 0)
+						anim.RightKnee = CFrame.Angles(math.rad(90), 0, 0)
+						if TimeOfFalling > 1 then
+							local x = TotalRuntime * math.pi * 3.9
+							local sin, cos = math.sin(x), math.cos(x)
+							local how = math.clamp(velocity.Z / 16, 0, 1)
+							anim.Neck = CFrame.Angles(math.rad(how * 20 - 10), 0, 0)
+							anim.Waist = CFrame.Angles(math.rad(how * 35 - 30), 0, 0)
+							anim.LeftShoulder = CFrame.new(0, 0, -0.1) * CFrame.Angles(math.rad(90 + sin * 20), math.rad(cos * 20 + how * 90), 0)
+							anim.RightShoulder = CFrame.new(0, 0, -0.1) * CFrame.Angles(math.rad(90 - sin * 20), math.rad(cos * 20 - how * 90), 0)
+							anim.LeftElbow = CFrame.Angles(math.rad(-10 + sin * 5), 0, 0)
+							anim.RightElbow = CFrame.Angles(math.rad(-10 - sin * 5), 0, 0)
+							local sit = 90 - how * 90
+							anim.LeftHip = CFrame.Angles(math.rad(sit + sin * 45), math.rad(5), 0)
+							anim.RightHip = CFrame.Angles(math.rad(sit - sin * 45), math.rad(-5), 0)
+							local brace = 50 - how * 50
+							anim.LeftKnee = CFrame.Angles(math.rad(brace + cos * 30), 0, 0)
+							anim.RightKnee = CFrame.Angles(math.rad(brace - cos * 30), 0, 0)
+						else
+							local x = TotalRuntime * math.pi * 3.9
+							local inv = rootcf.Rotation
+							if rootcf.UpVector:Dot(Vector3.yAxis) < 0.8 then
+								local a, b, c = rootcf.Rotation:ToEulerAnglesXYZ()
+								inv = CFrame.fromEulerAnglesXYZ(-a, -b, -c)
+							end
+							anim.Neck = CFrame.lookAlong(Vector3.zero, Vector3.new(velocity.X, velocity.Y, -12))
+							anim.Waist = CFrame.lookAlong(Vector3.zero, Vector3.new(0, velocity.Z, -12))
+							if velocity.Magnitude > 0 then
+								anim.LeftShoulder = anim.Waist:Inverse() * CFrame.new(0, 0, velocity.Z) * (CFrame.lookAlong(Vector3.zero, velocity.Unit) * CFrame.Angles(math.pi * 0.5, 0, 0)):Lerp(inv, math.min(1, 1 / velocity.Magnitude))
+							else
+								anim.LeftShoulder = anim.Waist:Inverse() * CFrame.new(0, 0, velocity.Z) * inv
+							end
+							anim.RightShoulder = anim.LeftShoulder 
+							anim.LeftElbow = CFrame.lookAlong(Vector3.zero, Vector3.new(0, velocity.Magnitude, -16))
+							anim.RightElbow = CFrame.lookAlong(Vector3.zero, Vector3.new(0, velocity.Magnitude, -16))
+							local move = velocity * Vector3.new(1, 0, 1) * math.sin(x) * 1.5
+							anim.LeftHip = CFrame.lookAlong(Vector3.zero, Vector3.new(0, move.Z, -16), Vector3.new(move.X, 16, 0))
+							anim.RightHip = CFrame.lookAlong(Vector3.zero, Vector3.new(0, -move.Z, -16), Vector3.new(-move.X, 16, 0))
+							anim.LeftKnee = CFrame.identity
+							anim.RightKnee = CFrame.identity
+						end
+					end
+					StrengthSmoothing = strength + (StrengthSmoothing - strength) * math.exp(-16 * dt)
+					for name,muscles in Muscles do
+						muscles.SetStrength(StrengthSmoothing)
+						local cf = anim[name] or CFrame.identity
+						if AnimSmoother[name] == nil then
+							AnimSmoother[name] = cf
+						end
+						cf = cf:Lerp(AnimSmoother[name], math.exp(-32 * dt))
+						AnimSmoother[name] = cf
+						muscles.SetCFrame(cf)
+					end
+				end)
+				Phoria.StepEvent = StepEvent
+				return Phoria, Model, Ragdoll
+			end
+
+			-- badly written code warning!
+
+			local he = figure:FindFirstChild("Head")
+			local la = figure:FindFirstChild("Left Arm")
+			local ra = figure:FindFirstChild("Right Arm")
+			local ll = figure:FindFirstChild("Left Leg")
+			local rl = figure:FindFirstChild("Right Leg")
+			root.Anchored, torso.Anchored, he.Anchored, la.Anchored, ra.Anchored, ll.Anchored, rl.Anchored = true, true, true, true, true, true, true
+			
+			local Phoria, Model, Ragdoll = CreateRagdoll(root.CFrame)
+			Model.Parent = figure
+			Model:ScaleTo(figure:GetScale())
+			for _,v in Ragdoll:GetDescendants() do
+				if v:IsA("BasePart") then v.Transparency = 1 end
+			end
+
+			local function createNoCollide(p0, p1)
+				local nocoll = Instance.new("NoCollisionConstraint")
+				nocoll.Name = p0.Name .. " To " .. p1.Name
+				nocoll.Part0, nocoll.Part1 = p0, p1
+				nocoll.Parent = Model
+			end
+			for _,v in Ragdoll:GetDescendants() do
+				if v:IsA("BasePart") then
+					createNoCollide(v, root)
+					createNoCollide(v, torso)
+					createNoCollide(v, he)
+					createNoCollide(v, la)
+					createNoCollide(v, ra)
+					createNoCollide(v, ll)
+					createNoCollide(v, rl)
+				end
+			end
+
+			local function lerplimb(part1, part2, percent)
+				part1.CFrame = part2.Upper.CFrame:Lerp(part2.Lower.CFrame, percent) * CFrame.new(0, -part1.Size.Y / 4, 0):Lerp(CFrame.new(0, part1.Size.Y / 4, 0), percent)
+			end
+
+			local step = RunService.Heartbeat:Connect(function()
+				hum.PlatformStand = true
+				if hum.MoveDirection.Magnitude > 0 or hum.Jump then
+					local acc = hum.MoveDirection * 16
+					if hum.Jump then
+						acc += Vector3.new(0, 16, 0)
+					end
+					for _,v in Ragdoll:GetDescendants() do
+						if v:IsA("BasePart") then
+							v.Velocity = acc * figure:GetScale()
+						end
+					end
+				end
+				he.CFrame = ragdoll.Head.CFrame
+				lerplimb(torso, Ragdoll.Torso, 0.5)
+				lerplimb(la, Ragdoll["Left Arm"], 0.8)
+				lerplimb(ra, Ragdoll["Right Arm"], 0.8)
+				lerplimb(ll, Ragdoll["Left Leg"], 0.8)
+				lerplimb(rl, Ragdoll["Right Leg"], 0.8)
+				root.CFrame = torso.CFrame
+			end)
+			
+			teleporthack = root:GetPropertyChangedSignal("CFrame"):Connect(function()
+				local cf = root.CFrame
+				Phoria.Teleport(cf)
+			end)
+
+			cleanupeverything = function()
+				root.Anchored, torso.Anchored, he.Anchored, la.Anchored, ra.Anchored, ll.Anchored, rl.Anchored = false, false, false, false, false, false, false
+				Phoria.StepEvent:Disconnect()
+				Model:Destroy()
+			end
+		end,
+	}
+
+	m.Init = function(figure: Model)
+		m.Destroy(figure)
+		Ragdolls[m.Mode](figure)
 	end
+	m.Update = function(dt: number, figure: Model) end
 	m.Destroy = function(figure: Model?)
-		for _,v in motors do
-			v.Enabled = true
-		end
-		for _,v in joints do
-			v:Destroy()
-		end
+		if cleanupeverything then cleanupeverything = cleanupeverything() and false or nil end
 		if teleporthack then teleporthack:Disconnect() teleporthack = nil end
 		if not figure then return end
 		local hum = figure:FindFirstChild("Humanoid")
