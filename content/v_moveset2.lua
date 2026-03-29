@@ -7260,8 +7260,8 @@ AddModule(function()
 			if not rootu:IsDescendantOf(workspace) then
 				return
 			end
-			CreateSound("156572165", 1, 4)
-			CreateSound("130679953063646", 1, 4)
+			CreateSound("156572165", 1, 2)
+			CreateSound("130679953063646", 1, 2)
 			local target = MouseHit()
 			local hole = root.CFrame * CFrame.new(Vector3.new(1, 0.5, -5) * scale)
 			hole = HatReanimator.GetAttachmentCFrame(gun.Group .. "Attachment") or hole
