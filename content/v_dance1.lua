@@ -518,7 +518,7 @@ AddModule(function()
 					local rootcf = root.CFrame
 					local realvelocity = root.Velocity / scale
 					local velocity = rootcf:VectorToObjectSpace(realvelocity)
-					if Raycast(rootcf.Position, (Vector3.new(0, -5, 0) + realvelocity * 0.2) * scale) == nil then
+					if Raycast(rootcf.Position, (Vector3.new(0, -20, 0) + realvelocity * 0.2) * scale) == nil then
 						TimeOfFalling += dt * 4
 					else
 						TimeOfFalling = 0
@@ -562,7 +562,7 @@ AddModule(function()
 						anim.RightHip = CFrame.Angles(math.rad(110), math.rad(10), 0)
 						anim.LeftKnee = CFrame.Angles(math.rad(90), 0, 0)
 						anim.RightKnee = CFrame.Angles(math.rad(90), 0, 0)
-						if root.RotVelocity.Magnitude > math.pi * 1.8 then
+						if root.RotVelocity.Magnitude < math.pi * 1.8 then
 							if TimeOfFalling > 1 then
 								local x = TotalRuntime * math.pi * 3.9
 								local sin, cos = math.sin(x), math.cos(x)
