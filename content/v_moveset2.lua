@@ -7320,7 +7320,7 @@ AddModule(function()
 			end
 			local sound = Instance.new("Sound", rootu)
 			sound.SoundId = "rbxassetid://118325610335607"
-			sound.Volume = 10
+			sound.Volume = 2
 			sound.EmitterSize = 300
 			sound:Play()
 			local s = os.clock()
