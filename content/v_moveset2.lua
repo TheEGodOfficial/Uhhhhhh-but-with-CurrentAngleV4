@@ -8430,6 +8430,7 @@ AddModule(function()
 				MeleeHitbox(rootu, 0.2, CFrame.new(0, 0, -4 * scale), Vector3.new(5, 5, 8) * scale)
 				CreateForce(rootu, rootu.CFrame.LookVector * 24, 0.2)
 				animationOverride = lerps.sword8
+				swordoff = CFrame.new(0.5, 0.5, 0) * CFrame.Angles(math.rad(-5), 0, math.rad(-90))
 				task.wait(0.2)
 				if not rootu:IsDescendantOf(workspace) then
 					return
@@ -9201,7 +9202,7 @@ AddModule(function()
 			local lastcf = rarm.CFrame
 			repeat
 				local dt = task.wait()
-				local off = joints.sw * SWC0 * HBC0
+				local off = joints.sw * SWC0 * HBC0 * CFrame.new(0, 0.5, 0)
 				local acf = lastcf * off
 				local bcf = rarm.CFrame * off
 				if (acf.Position - bcf.Position).Magnitude > 1 then
@@ -9355,8 +9356,8 @@ AddModule(function()
 		SetOverrideMovesetMusic(AssetGetContentId("SlasherTheme.mp3"), "Forsaken OST - A Grave Soul (NOW, RUN)", 1, NumberRange.new(0, 69.538))
 		sword = {
 			Group = "Sword",
-			Limb = "Right Arm",
-			Offset = CFrame.identity
+			Limb = "Left Arm",
+			Offset = CFrame.new(0, -1, 0) * CFrame.Angles(1.57, 0, 0)
 		}
 		table.insert(HatReanimator.HatCFrameOverride, sword)
 		ContextActions:BindAction("Uhhhhhh_SSSword", function(_, state, _)
@@ -9448,7 +9449,7 @@ AddModule(function()
 		SetC0C1Joint(lhj, joints.lh, CFrame.new(-0.5, 1, 0, 0, 0, -1, 0, 1, 0, 1, 0, 0), scale)
 		
 		-- sword
-		sword.Offset = joints.sw * SWC0 * CFrame.new(0, 2.5, 0) * CFrame.Angles(3.1, 0, 0)
+		--sword.Offset = joints.sw * SWC0 * CFrame.new(0, 2.5, 0) * CFrame.Angles(3.1, 0, 0)
 		sword.Disable = not not isdancing
 	end
 	m.Destroy = function(figure: Model?)
