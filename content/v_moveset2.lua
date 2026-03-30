@@ -7692,7 +7692,7 @@ AddModule(function()
 					CreateSound("128788885488982", 1, 0.5)
 				end
 				if hum:GetState() == Enum.HumanoidStateType.Flying then
-					hum:ChangeState(Enum.HumanoidStateType.FreeFall)
+					hum:ChangeState(Enum.HumanoidStateType.Freefall)
 				end
 			end
 			if gofly then
