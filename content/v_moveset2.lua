@@ -7711,7 +7711,7 @@ AddModule(function()
 					end
 					root.Velocity = xz + Vector3.new(0, vel.Y, 0)
 					local cf = CFrame.lookAlong(Vector3.zero, dir) * CFrame.Angles(-1.5, 0, 0)
-					root.CFrame = CFrame.lookAlong(Vector3.zero, cf.LookVector * Vector3.new(1, 0.001, 1)) + root.CFrame.Position
+					root.CFrame = CFrame.lookAlong(Vector3.zero, cf.UpVector * Vector3.new(1, 0.001, 1)) + root.CFrame.Position
 					torsooff = root.CFrame.Rotation:ToObjectSpace(cf)
 				else
 					hum.WalkSpeed = 112 * scale
