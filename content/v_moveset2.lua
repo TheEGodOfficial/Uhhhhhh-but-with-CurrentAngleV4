@@ -7698,9 +7698,12 @@ AddModule(function()
 					local dir = (ReanimCamera.CFrame.LookVector * 2 + hum.MoveDirection).Unit
 					hum.WalkSpeed = 0.001
 					local vel = root.Velocity
-					vel += Vector3.new(0, workspace.Gravity + 1, 0) * dt + dir * 49 * dt
+					vel += (dir * 49 + Vector3.new(0, workspace.Gravity + 1, 0)) * dt
 					local xz = vel * Vector3.new(1, 0, 1)
-					if xz.Magnitude > 112 * scale then xz = xz.Unit * 112 * scale end
+					if xz.Magnitude > 112 * scale then
+						xz = xz.Unit * 112 * scale
+					end
+					print(vel)
 					print(xz)
 					root.Velocity = xz + Vector3.new(0, vel.Y, 0)
 					torsooff = root.CFrame.Rotation:ToObjectSpace(CFrame.lookAlong(Vector3.zero, dir)) * CFrame.Angles(-1.5, 0, 0)
