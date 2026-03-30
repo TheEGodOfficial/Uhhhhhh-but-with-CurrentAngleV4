@@ -461,7 +461,7 @@ AddModule(function()
 				end
 				local TotalRuntime = 0
 				local FearOfHeights = {}
-				local TimeOfTheFear = 0
+				local TimeOfPreserve = 0
 				local TimeOfFalling = 0
 				local IAmShocked = 0
 				local StrengthSmoothing = 0
@@ -557,6 +557,7 @@ AddModule(function()
 							anim[name] = FearOfHeights[name]
 						end
 					else
+						TimeOfPreserve += dt * math.min(2, velocity.Magnitude / 16)
 						strength *= math.min(1, velocity.Magnitude / 10)
 						anim.Neck = CFrame.Angles(math.rad(-45), 0, 0)
 						anim.Waist = CFrame.Angles(math.rad(-45), 0, 0)
@@ -570,7 +571,7 @@ AddModule(function()
 						anim.RightKnee = CFrame.Angles(math.rad(90), 0, 0)
 						if root.RotVelocity.Magnitude < math.pi * 1.8 then
 							if TimeOfFalling > 1 then
-								local x = TotalRuntime * math.pi * 3.9
+								local x = TimeOfPreserve * math.pi * 3.9
 								local sin, cos = math.sin(x), math.cos(x)
 								local how = math.clamp(velocity.Magnitude > 0 and (velocity.Unit.Z * 1.25) or 0, -1, 1) * 0.5 + 0.5
 								anim.Neck = CFrame.Angles(math.rad(how * 20 - 10), 0, 0)
@@ -586,7 +587,7 @@ AddModule(function()
 								anim.LeftKnee = CFrame.Angles(math.rad(brace + cos * 30), 0, 0)
 								anim.RightKnee = CFrame.Angles(math.rad(brace - cos * 30), 0, 0)
 							else
-								local x = TotalRuntime * math.pi * 4.2 -- 3.9
+								local x = TimeOfPreserve * math.pi * 3.9
 								local inv = rootcf.Rotation
 								if rootcf.UpVector:Dot(Vector3.yAxis) < 0.8 then
 									local a, b, c = rootcf.Rotation:ToEulerAnglesXYZ()
