@@ -7700,9 +7700,10 @@ AddModule(function()
 					local vel = root.Velocity
 					vel += Vector3.new(0, workspace.Gravity + 1, 0) * dt + dir * 49 * dt
 					local xz = vel * Vector3.new(1, 0, 1)
-					if xz.Magnitude > 112 then xz = xz.Unit * 112 end
+					if xz.Magnitude > 112 * scale then xz = xz.Unit * 112 * scale end
+					print(xz)
 					root.Velocity = xz + Vector3.new(0, vel.Y, 0)
-					torsooff = root.CFrame.Rotation:ToObjectSpace(CFrame.lookAlong(Vector3.zero, dir)) * CFrame.Angles(1.5, 0, 0)
+					torsooff = root.CFrame.Rotation:ToObjectSpace(CFrame.lookAlong(Vector3.zero, dir)) * CFrame.Angles(-1.5, 0, 0)
 				else
 					hum.WalkSpeed = 112 * scale
 					root.Velocity += Vector3.new(0, workspace.Gravity + 50, 0) * dt
