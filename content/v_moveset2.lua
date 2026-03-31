@@ -4652,16 +4652,18 @@ AddModule(function()
 			if block then
 				block.Anchored = false
 				block.CanCollide = true
-				block.CustomPhysicalProperties = PhysicalProperties.new(0.7, 0.2, 0.9, 100, 100)
+				block.CustomPhysicalProperties = PhysicalProperties.new(0.7, 0.2, 0.5, 100, 100)
 				block.Velocity = rootu.CFrame:VectorToWorldSpace(Vector3.new(0, -70, -80))
+				block.RotVelocity = rootu.CFrame:VectorToWorldSpace(Vector3.new(5, 0, 0))
 				task.spawn(function()
 					local s = os.clock()
-					local lastvel = block.Velocity
+					local lasthit = 0
 					repeat local dt = task.wait()
 						Attack(block.Position, 5, true)
-						if (lastvel - block.Velocity).Magnitude > workspace.Gravity * dt + 0.1 then
-							local hit = PhysicsRaycast(block.Position, Vector3.yAxis * -12)
+						if os.clock() - lasthit then
+							local hit = PhysicsRaycast(block.Position, block.Velocity)
 							if hit then
+								lasthit = os.clock()
 								local ref = CreatePart(1, "Alder", Vector3.zero)
 								ref.Position = hit.Position
 								BlastEffect("White", ref.Position, Vector3.new(1, 0.2, 1), Vector3.new(1, 0, 1))
@@ -4673,7 +4675,6 @@ AddModule(function()
 								SetGunauraState(ref.Position)
 							end
 						end
-						lastvel = block.Velocity
 					until os.clock() - s > 5 or block.Velocity.Y < -300
 					block:Destroy()
 				end)
