@@ -9048,15 +9048,15 @@ AddModule(function()
 			return rt, nt, rst, lst, rht, lht
 		end,
 		walk = function(timingsine, rt, nt, rst, lst, rht, lht)
-			rt = RC0 * CFrame.Angles(math.rad(20), 0, math.rad(60))
-			nt = NC0 * CFrame.Angles(math.rad(-10), math.rad(10), math.rad(-50))
-			rst = CFrame.new(1.5, 0.5, 0) * CFrame.Angles(math.rad(70), math.rad(100), 0)
-			lst = CFrame.new(-1.5, 0.5, 0) * CFrame.Angles(math.rad(50), math.rad(-70), 0)
-			rht = CFrame.new(1, -1, 0) * CFrame.Angles(0, math.rad(80), math.rad(20))
-			lht = CFrame.new(-1, -1, 0) * CFrame.Angles(0, math.rad(-100), 0)
-			swordoff = CFrame.Angles(0, math.rad(-5), 0)
-			return rt, nt, rst, lst, rht, lht
+			rt = CFrame.new(0, 0.05 * math.sin(timingsine * 16 + 0), 0) * CFrame.Angles(-1.919 + 0.034 * math.sin(timingsine * 8 + 1.3), 0, 4.188)
+			nt = CFrame.new(0, 1, 0) * CFrame.Angles(-1.396 + 0.017 * math.sin(timingsine * 16 + 0), -0.174, 2.443 + -0.034 * math.sin(timingsine * 8 + 1.296))
+			rst = CFrame.new(1, 0.5 + 0.02 * math.sin(timingsine * 16 + 3.433), 0) * CFrame.Angles(1.221, 1.745, 0)
+			lst = CFrame.new(-1, 0.5 + 0.02 * math.sin(timingsine * 16 + 3.433), 0) * CFrame.Angles(0.872, -1.221, 0)
+			rht = CFrame.new(1.3, -0.7 + 0.15 * math.sin(timingsine * 8 + 1), 0.2) * CFrame.Angles(-0.174, 0.698, 0.523 + 0.523 * math.sin(timingsine * 8 + 0))
+			lht = CFrame.new(-0.7, -1.1 + 0.15 * math.sin(timingsine * 8 + 5.283), -0.7) * CFrame.Angles(0, -2.443, -0.349 + 0.523 * math.sin(timingsine * 8 + 0))
+			return rt, nt, rst, lst, rht, lht, 16
 		end,
+		--MW_animatorProgressSave: Torso,0,0,0,8,-110,2,0.162,8,0,0.05,0,16,0,0,0,8,0,0,0,8,240,0,0,8,Head,0,0,0,8,-80,1,0,16,1,0,0.125,16,-10,0,0,8,0,0,0,8,140,-2,0.162,8,RightArm,1,0,0,8,70,0,0,8,0.5,0.02,1,16,100,0,0,8,0,0,0,8,0,0,0,8,LeftArm,-1,0,0,8,50,0,0,8,0.5,0.02,1,16,-70,0,0,8,0,0,0,8,0,0,0,8,RightLeg,1.3,0,0,8,-10,0,0,8,-0.7,0.15,0.125,8,40,0,0,8,0.2,0,0,8,30,30,0,8,LeftLeg,-0.7,0,0,8,0,0,0,8,-1.1,0.15,-0.125,8,-140,0,0,8,-0.7,0,0,8,-20,30,0,8
 		jump = function(timingsine, rt, nt, rst, lst, rht, lht)
 			rt = RC0 * CFrame.Angles(math.rad(-5), 0, 0)
 			nt = NC0 * CFrame.Angles(math.rad(-10), 0, 0)
