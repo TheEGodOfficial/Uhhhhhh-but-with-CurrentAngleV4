@@ -790,7 +790,6 @@ local function UpdateGrads(t)
 	local ogc = ColorSequence.new(c, bgc)
 	for _,grad in StylizedObjs do
 		local obj, Out, OutGrad, options = grad.obj, grad.Out, grad.OutGrad, grad.options
-		Out.Color = c
 		if options.Depthed then
 			obj.BackgroundColor3 = bgcd
 		else
