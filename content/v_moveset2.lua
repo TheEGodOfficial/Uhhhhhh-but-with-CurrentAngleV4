@@ -9048,6 +9048,7 @@ AddModule(function()
 			return rt, nt, rst, lst, rht, lht
 		end,
 		walk = function(timingsine, rt, nt, rst, lst, rht, lht)
+			timingsine /= 60
 			rt = CFrame.new(0, 0.05 * math.sin(timingsine * 16 + 0), 0) * CFrame.Angles(-1.919 + 0.034 * math.sin(timingsine * 8 + 1.3), 0, 4.188)
 			nt = CFrame.new(0, 1, 0) * CFrame.Angles(-1.396 + 0.017 * math.sin(timingsine * 16 + 0), -0.174, 2.443 + -0.034 * math.sin(timingsine * 8 + 1.296))
 			rst = CFrame.new(1, 0.5 + 0.02 * math.sin(timingsine * 16 + 3.433), 0) * CFrame.Angles(1.221, 1.745, 0)
