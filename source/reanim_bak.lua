@@ -377,7 +377,6 @@ do
 		"fr_keygen31.ft2.mp3",
 		"lightinursoul.graphic.png",
 		"letriangul.graphic.png",
-		"wearegenesis.graphic.png",
 	}
 	local redownloadeverything = SaveData.CDNVersion ~= CDNVersion
 	local theresassetsmissing = redownloadeverything
@@ -649,27 +648,173 @@ UISound.Music.Ended:Connect(function()
 	MusicPlayer.PlayMusic()
 end)
 
--- fake obfuscation lag
-for _=1, 4 do for _=1, 1e6 do end end
-task.wait(0.2)
-
-do
-	local genesis = Instance.new("ImageLabel", UIMainFrame)
-	genesis.AnchorPoint = Vector2.new(0.5, 0.5)
-	genesis.Position = UDim2.fromScale(0.5, 0.5)
-	genesis.Size = UDim2.fromOffset(100, 100)
-	genesis.Rotation = 15
-	genesis.BackgroundTransparency = 1
-	genesis.Image = Util.GetCDNAsset("wearegenesis.graphic.png")
-	genesis.ImageColor3 = Color3.new(0, 0, 1)
-	genesis.ImageTransparency = 1
-	genesis.ZIndex = 99999
-	TweenService:Create(genesis, TweenInfo.new(0.3, Enum.EasingStyle.Linear, Enum.EasingDirection.In, -1, true), {Transparency = 0}):Play()
-	Debris:AddItem(genesis, 4)
-	task.wait(3)
+SaveData.SkipIntro = not not SaveData.SkipIntro
+if SaveData.SkipIntro then
+	MusicPlayer.PlayMusic()
+else
+	UISound.Music.Volume = 0
+	MusicPlayer.PlayMusic(1)
+	repeat RunService.RenderStepped:Wait() until UISound.Music.IsLoaded
+	UISound.Music:Stop()
+	task.wait()
+	UISound.Music:Play()
+	UISound.Music.Volume = 1
+	UISound.Music.TimePosition = 0
+	local scrolltexts = {
+		"stevetherealone presents a script                                 ",
+		"hi guys welcome to my game                                        ",
+		"holy shit where did our friends go?               *gets vc warned*",
+		"greetings to qpmbsjbvt for getting me into reanimation            ",
+		"those who know the place called ajman, dubai, uae                 ",
+		":3 :3 :3 :3 :3 :3 :3 :3 :3 :3 :3 :3 :3 :3 :3 >:3 :3 :3 :3 :3 :3 :3 :3 :3 :3 :3 :3 :3 :3 :3",
+		--"quick intro and quick scrolltext                                                                   hi i like dih",
+		"quick intro        with quick scrolltext         and you will miss the punchline              punchline                did you get the punchline?  ",
+		"meeeooowwwwwwwwww >:3                                          maw",
+		"wwwwwwwwwwwwwwwwwww                         grass                 ",
+		"erika's the towers                            sfoth iv update when",
+		"i will leak all ur script i will leak all ur script i will leak al",
+		"kasil loves gooning to everybody                                  ",
+		"fflags are dead lol                                               ",
+		"imagine being called a dummy                                      ",
+		-- DEAD MEME "nothing beats a jet 2 holiday. and right now, im beating myself to",
+		"hi                          ...                oxide more like sui",
+		"even if I mope, nothing good will happen! if i worked hard today, today will be perfecto!",
+		"hi                          ...                                   ",
+		"who the fuck even reads this??                     hi guys        ",
+		"          trust me the ui looks good             here it comes    ",
+		-- its not a btp release "is this even a btp legends release?? i myself dk if it should be  ",
+		"dying is scary, but living is difficult                               dying: gifted scary; living: pure difficult",
+		"but i halter my forethought, i keep on running like a chicken with his dih",
+		"kaiya sounds like a perfect name for a genshin impact character   ",
+		"this is an intro lol                        ",
+		"greetings to myworld for helping with -net less                   ",
+		"Omega-Skidded Immortality Lord Diddy Blud On The Calculator       ",
+		"all UI music credits to dubmood, zabutom, ogge, 4mat and hoster   ",
+		"heres the triforce                and heres my name                              ",
+		"skids are now taking credit of this entire script, meaning its so good           ",
+		-- nonono i cant advertise that anymore "whenever i see hat reanimation nowadays i check to see if they are collidable    ",
+		"skids, be alert, go to weao.xyz for your roblox hacks!            ",
+	}
+	scrolltexts = scrolltexts[math.random(1, #scrolltexts)]
+	local fade = TweenService:Create(UIMainFrame, TweenInfo.new(5), {BackgroundTransparency = 0.5})
+	fade:Play()
+	local scrolltext = Util.MakeText(scrolltexts)
+	scrolltext.Parent = UIMainFrame
+	scrolltext.ZIndex = 0
+	scrolltext.AnchorPoint = Vector2.new(0, 0.5)
+	scrolltext.Position = UDim2.new(1.5, 0, 0.5, 0)
+	Util.SetTextColor(scrolltext, Color3.new(1, 1, 1), 0.6)
+	TweenService:Create(scrolltext, TweenInfo.new(5.256, Enum.EasingStyle.Linear), {
+		Position = UDim2.new(1, 0, 0.5, 0),
+		AnchorPoint = Vector2.new(1, 0.5),
+	}):Play()
+	local scrolltextratio = scrolltext.Size.X.Offset / scrolltext.Size.Y.Offset
+	local Triforce1 = Util.MakeTriforce(3, Color3.new(1, 0.7, 0), 4)
+	local Triforce2 = Util.MakeTriforce(3, Color3.new(0.8, 0.4, 0), 4)
+	Triforce1.ZIndex = 2
+	Triforce2.ZIndex = 1
+	Triforce1.Parent = UIMainFrame
+	Triforce2.Parent = UIMainFrame
+	local TRI_offset = 0.01
+	local TRI_height = 0.5
+	local TRI_rot = 0
+	local TRI_rotvel = 720
+	local TRI_scale = 0
+	local stevetherealone = Util.Instance("TextLabel", UIMainFrame)
+	stevetherealone.TextScaled = true
+	stevetherealone.Font = Enum.Font.Arcade
+	stevetherealone.TextColor3 = Color3.new(1, 1, 1)
+	stevetherealone.BackgroundColor3 = Color3.new(0, 0, 0)
+	stevetherealone.BackgroundTransparency = 0
+	stevetherealone.BorderColor3 = Color3.new(1, 1, 1)
+	stevetherealone.BorderSizePixel = 8
+	stevetherealone.AnchorPoint = Vector2.new(0.5, 0.5)
+	stevetherealone.Position = UDim2.new(0.5, 0, 0.5, 0)
+	stevetherealone.Size = UDim2.new(0, 0, 0, 0)
+	stevetherealone.Visible = false
+	stevetherealone.ZIndex = 3
+	local stevetherealone_padding = Util.Instance("UIPadding", stevetherealone)
+	stevetherealone_padding.PaddingLeft = UDim.new(0, 10)
+	stevetherealone_padding.PaddingRight = UDim.new(0, 10)
+	stevetherealone_padding.PaddingTop = UDim.new(0, 10)
+	stevetherealone_padding.PaddingBottom = UDim.new(0, 10)
+	while true do
+		local dt = RunService.Heartbeat:Wait()
+		local t = UISound.Music.TimePosition
+		if t >= 5.256 then break end
+		local screensize = Util.GetScreenSize()
+		local ysize = screensize.Y
+		local height = ysize / 3
+		scrolltext.Size = UDim2.fromOffset(height * scrolltextratio * 0.5, height)
+		TRI_rot = (TRI_rot + TRI_rotvel * dt) % 360
+		TRI_rotvel *= math.exp(-0.25 * dt)
+		Triforce1.Size = UDim2.fromOffset(TRI_scale * ysize * 0.8, TRI_scale * ysize * 0.8)
+		if t >= 4.256 then
+			local a = t - 4.256
+			Triforce1.Size = Triforce1.Size:Lerp(UDim2.fromOffset(160, 160), a)
+			TRI_height = 0.5 + (15 / ysize) * a
+		end
+		Triforce2.Size = Triforce1.Size
+		Triforce1.Position = UDim2.new(0.5, ysize * -TRI_offset, TRI_height, ysize * -TRI_offset)
+		Triforce2.Position = UDim2.new(0.5, 0, TRI_height, 0)
+		Triforce1.Rotation = TRI_rot
+		Triforce2.Rotation = TRI_rot
+		if t < 4.256 then
+			TRI_scale = 1 - ((1 - math.min(1, t / 3)) ^ 2)
+		else
+			local a = t - 4.256
+			TRI_scale = 1 + a * 13
+			if a > 0.5 then
+				Triforce1.ZIndex = 5
+				Triforce2.ZIndex = 4
+			else
+				Triforce1.ZIndex = 2
+				Triforce2.ZIndex = 1
+			end
+		end
+		if t < 2.152 then
+			stevetherealone.Text = ""
+			stevetherealone.Visible = false
+		elseif t < 2.652 then
+			local a = (t - 2.152) / 0.5
+			local z = 20 * ((a * 100) // 20)
+			stevetherealone.Text = ""
+			stevetherealone.Visible = true
+			stevetherealone.Size = UDim2.fromOffset(z, z)
+		elseif t < 4.756 then
+			stevetherealone.Text = "STEVE\nTHERE\nALONE"
+			stevetherealone.Visible = true
+			stevetherealone.Size = UDim2.fromOffset(100, 100)
+		else
+			local a = (t - 4.756) / 0.5
+			local x = 20 * ((a * 260 + 100) // 20)
+			local y = 20 * ((math.min(1, a / 0.538) * 140 + 100) // 20)
+			stevetherealone.Text = ""
+			stevetherealone.Visible = true
+			stevetherealone.Size = UDim2.fromOffset(x, y)
+			stevetherealone.Position = UDim2.new(0.5, 0, 0.5, 0)
+		end
+	end
+	stevetherealone:Destroy()
+	Triforce1:Destroy()
+	Triforce2:Destroy()
+	scrolltext:Destroy()
+	fade:Cancel()
+	UIMainFrame.BackgroundTransparency = 1
+	local flash = Util.Instance("Frame", UIMainFrame)
+	flash.AnchorPoint = Vector2.new(0, 0)
+	flash.Position = UDim2.new(0, 0, 0, 0)
+	flash.Size = UDim2.new(1, 0, 1, 0)
+	flash.BackgroundColor3 = Color3.new(1, 1, 1)
+	flash.BackgroundTransparency = 0
+	flash.BorderSizePixel = 0
+	flash.Interactable = false
+	flash.ZIndex = 256
+	TweenService:Create(flash, TweenInfo.new(1), {
+		BackgroundTransparency = 1
+	}):Play()
+	Debris:AddItem(flash, 1)
 end
-
-MusicPlayer.PlayMusic()
 
 SaveData.MuteUIMusic = not not SaveData.MuteUIMusic
 SaveData.MuteReanimMusic = not not SaveData.MuteReanimMusic
