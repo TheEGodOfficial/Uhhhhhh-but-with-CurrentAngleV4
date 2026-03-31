@@ -29,6 +29,10 @@ local SINDRAGON_HATMAP_CLAWR = table.concat({
 	"10238388564, 10238404030, -0.0829811, 0.274033, -7.26051, -0.196172, -0.939692, 0.28017, -0.46554, 0.34072, 0.816812, -0.863012, 0.0298054, -0.504304",
 	"",
 }, "|")
+local SINDRAGON_HATMAP_BLOCK = table.concat({
+	"17323421898,",
+	"",
+}, "|")
 
 local LINKEDSWORD_HATMAP_BALL = table.concat({
 	"6504654865, 6504654926, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1",
@@ -4148,9 +4152,11 @@ AddModule(function()
 	local dragonhead = {}
 	local dragonclawl = {}
 	local dragonclawr = {}
+	local dragonblock = {}
 	local dragonheadm = SINDRAGON_HATMAP_HEAD
 	local dragonclawlm = SINDRAGON_HATMAP_CLAWL
 	local dragonclawrm = SINDRAGON_HATMAP_CLAWR
+	local dragonblockm = SINDRAGON_HATMAP_BLOCK
 	local insts = {}
 	local state = 0
 	local statetime = 0
@@ -4210,6 +4216,14 @@ AddModule(function()
 							tonumber(w[13]),
 							tonumber(w[14])
 						),
+					}
+					table.insert(HatReanimator.HatCFrameOverride, ref)
+					table.insert(tbl, ref)
+				elseif #w == 2 then
+					local ref = {
+						MeshId = w[1]:gsub("^%s*(.-)%s*$", "%1"), TextureId = w[2]:gsub("^%s*(.-)%s*$", "%1"),
+						C0 = CFrame.identity,
+						C1 = CFrame.identity,
 					}
 					table.insert(HatReanimator.HatCFrameOverride, ref)
 					table.insert(tbl, ref)
@@ -4595,6 +4609,7 @@ AddModule(function()
 			hum.WalkSpeed = 50 * scale
 		end)
 	end
+	local BlockReference = nil
 	local function SmashDown()
 		if attacking and not m.NoCooldown then return end
 		if not root or not hum or not torso then return end
@@ -4606,6 +4621,11 @@ AddModule(function()
 		})
 		hum.WalkSpeed = 0
 		task.spawn(function()
+			local block = nil
+			if m.SmashDownAlt then
+				block = CreatePart(1, "Alder", Vector3.new(6, 3, 3))
+				BlockReference = block
+			end
 			task.spawn(PunchingPart, insts.ClawLPart, 0.41)
 			task.spawn(PunchingPart, insts.ClawRPart, 0.41)
 			animationOverride = function(timingsine, rt, nt, rst, lst, rht, lht, drhead, drleft, drrite)
@@ -4618,10 +4638,39 @@ AddModule(function()
 				drhead = CFrame.new(0, 6, 7) * CFrame.Angles(math.rad(50), 0, 0)
 				drleft = CFrame.new(4, 30, 10) * CFrame.Angles(math.rad(35), 0, math.rad(-90))
 				drrite = CFrame.new(-4, 30, 10) * CFrame.Angles(math.rad(35), 0, math.rad(90))
+				block.CFrame = rootu.CFrame.Rotation + (insts.ClawLPart.Position + insts.ClawRPart.Position) / 2
 				return rt, nt, rst, lst, rht, lht, drhead, drleft, drrite
 			end
 			task.wait(0.2)
 			if not rootu:IsDescendantOf(workspace) then return end
+			if block then
+				block.Anchored = false
+				block.CanCollide = true
+				block.Velocity = rootu.CFrame:VectorToWorldSpace(Vector3.new(0, -70, -80))
+				task.spawn(function()
+					local s = os.clock()
+					local lastvel = block.Velocity
+					repeat local dt = task.wait()
+						Attack(block.Position, 5, true)
+						if (lastvel - block.Velocity).Magnitude > workspace.Gravity * dt + 0.1 then
+							local hit = PhysicsRaycast(block.Position, Vector3.yAxis * -12)
+							if hit then
+								local ref = CreatePart(1, "Alder", Vector3.zero)
+								ref.Position = hit.Position
+								BlastEffect("White", ref.Position, Vector3.new(1, 0.2, 1), Vector3.new(1, 0, 1))
+								BlastEffect("White", ref.Position, Vector3.new(5, 1, 0.5), Vector3.new(0.1, 2, 0.1))
+								Attack(ref.Position, 8, true)
+								CreateSound(ref, 178452221)
+								CreateSound(ref, 192410084)
+								Debris:AddItem(ref, 2)
+								SetGunauraState(ref.Position)
+							end
+						end
+						lastvel = block.Velocity
+					until os.clock() - s > 5 or block.Velocity.Y < -300
+					block:Destroy()
+				end)
+			end
 			CreateSound(231917758)
 			CreateSound(159882584)
 			animationOverride = function(timingsine, rt, nt, rst, lst, rht, lht, drhead, drleft, drrite)
@@ -4641,19 +4690,21 @@ AddModule(function()
 			animationOverride = nil
 			attacking = false
 			hum.WalkSpeed = 50 * scale
-			local looky = rootu.CFrame * CFrame.new(Vector3.new(0, -2.5, -10) * scale)
-			for i=0, 9 do
-				local ref = CreatePart(1, "Alder", Vector3.zero)
-				ref.CFrame = looky * CFrame.new(0, 0, -10 * i)
-				BlastEffect("White", ref.Position, Vector3.new(1, 0.2, 1), Vector3.new(1, 0, 1))
-				BlastEffect("White", ref.Position, Vector3.new(5, 1, 0.5), Vector3.new(0.1, 2, 0.1))
-				Attack(ref.Position, 8, true)
-				CreateSound(ref, 178452221)
-				CreateSound(ref, 192410084)
-				Debris:AddItem(ref, 2)
-				SetGunauraState(ref.Position)
-				task.wait(0.08)
-				if not rootu:IsDescendantOf(workspace) then return end
+			if not block then
+				local looky = rootu.CFrame * CFrame.new(Vector3.new(0, -2.5, -10) * scale)
+				for i=0, 9 do
+					local ref = CreatePart(1, "Alder", Vector3.zero)
+					ref.CFrame = looky * CFrame.new(0, 0, -10 * i)
+					BlastEffect("White", ref.Position, Vector3.new(1, 0.2, 1), Vector3.new(1, 0, 1))
+					BlastEffect("White", ref.Position, Vector3.new(5, 1, 0.5), Vector3.new(0.1, 2, 0.1))
+					Attack(ref.Position, 8, true)
+					CreateSound(ref, 178452221)
+					CreateSound(ref, 192410084)
+					Debris:AddItem(ref, 2)
+					SetGunauraState(ref.Position)
+					task.wait(0.08)
+					if not rootu:IsDescendantOf(workspace) then return end
+				end
 			end
 		end)
 	end
@@ -4918,6 +4969,7 @@ AddModule(function()
 		statem1 = 0
 		animationinstant = false
 		animationOverride = nil
+		BlockReference = nil
 		scale = figure:GetScale()
 		hum = figure:FindFirstChild("Humanoid")
 		root = figure:FindFirstChild("HumanoidRootPart")
@@ -4933,6 +4985,7 @@ AddModule(function()
 		createhatmap(dragonheadm, dragonhead)
 		createhatmap(dragonclawlm, dragonclawl)
 		createhatmap(dragonclawrm, dragonclawr)
+		createhatmap(dragonblockm, dragonblock)
 		sethatmaplimbname(dragonhead, "HumanoidRootPart")
 		sethatmaplimbname(dragonclawl, "HumanoidRootPart")
 		sethatmaplimbname(dragonclawr, "HumanoidRootPart")
@@ -5632,6 +5685,16 @@ AddModule(function()
 			gunaura.CFrame = (root.CFrame.Rotation * CFrame.Angles(-math.pi / 2, angle, 0)) + gunaurastate[1]
 		else
 			gunaura.CFrame = root.CFrame + Vector3.new(0, -12 * scale, 0)
+		end
+		
+		-- block
+		if BlockReference and not BlockReference:IsDescendantOf(workspace) then
+			BlockReference = nil
+		end
+		if BlockReference then
+			sethatmapcframe(dragonblock, BlockReference.CFrame)
+		else
+			sethatmapcframe(dragonblock, root.CFrame + Vector3.new(0, -12 * scale, 0))
 		end
 		
 		-- client model appearance
@@ -9357,7 +9420,7 @@ AddModule(function()
 		sword = {
 			Group = "Sword",
 			Limb = "Left Arm",
-			Offset = CFrame.new(0, -1, 0) * CFrame.Angles(-1.5, 0, -0.05)
+			Offset = CFrame.new(0, -1, 0) * CFrame.Angles(-1.45, 0, -0.05)
 		}
 		table.insert(HatReanimator.HatCFrameOverride, sword)
 		ContextActions:BindAction("Uhhhhhh_SSSword", function(_, state, _)
