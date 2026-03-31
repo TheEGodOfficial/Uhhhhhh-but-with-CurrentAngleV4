@@ -664,7 +664,7 @@ do
 	genesis.ImageColor3 = Color3.new(0, 0, 1)
 	genesis.ImageTransparency = 1
 	genesis.ZIndex = 99999
-	TweenService:Create(genesis, TweenInfo.new(0.3, Enum.EasingStyle.Linear, Enum.EasingDirection.In, -1, true), {Transparency = 0}):Play()
+	TweenService:Create(genesis, TweenInfo.new(0.8, Enum.EasingStyle.Linear, Enum.EasingDirection.In, -1, true), {ImageTransparency = 0}):Play()
 	Debris:AddItem(genesis, 4)
 	task.wait(3)
 end
