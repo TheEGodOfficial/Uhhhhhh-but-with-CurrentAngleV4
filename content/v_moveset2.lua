@@ -4629,7 +4629,7 @@ AddModule(function()
 		task.spawn(function()
 			local block = nil
 			if m.SmashDownAlt then
-				block = CreatePart(1, "Alder", Vector3.new(6, 3, 3))
+				block = CreatePart(0, "Really black", Vector3.new(6, 3, 3))
 				BlockReference = block
 			end
 			task.spawn(PunchingPart, insts.ClawLPart, 0.41)
@@ -4652,6 +4652,7 @@ AddModule(function()
 			if block then
 				block.Anchored = false
 				block.CanCollide = true
+				block.CustomPhysicalProperties = PhysicalProperties.new(0.7, 0.2, 0.9, 100, 100)
 				block.Velocity = rootu.CFrame:VectorToWorldSpace(Vector3.new(0, -70, -80))
 				task.spawn(function()
 					local s = os.clock()
