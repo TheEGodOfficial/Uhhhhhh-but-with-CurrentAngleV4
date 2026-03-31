@@ -654,6 +654,7 @@ end)
 do local s = os.clock() + 0.5 + math.random() while os.clock() < s do end end
 task.wait(0.2)
 
+SaveData.SkipIntro = not not SaveData.SkipIntro
 do
 	local genesis = Instance.new("ImageLabel", UIMainFrame)
 	genesis.AnchorPoint = Vector2.new(0.5, 0.5)
