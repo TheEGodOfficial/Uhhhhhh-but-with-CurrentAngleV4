@@ -1074,7 +1074,7 @@ do
 		MainWindowClosed = not MainWindowClosed
 		if MainWindowClosed then
 			MainWindowPosOpen = UIMainWindow.Position
-			TopBarText.Text = "Genesis FE"
+			TopBarText.Text = "Genesis"
 			TweenService:Create(UIMainWindow, TweenInfo.new(0.5, Enum.EasingStyle.Cubic, Enum.EasingDirection.Out), {
 				Position = MainWindowPosClose,
 				Size = UDim2.fromOffset(112, 30)
