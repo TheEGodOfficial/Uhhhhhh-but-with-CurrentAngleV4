@@ -4654,13 +4654,13 @@ AddModule(function()
 				block.CanCollide = true
 				block.CustomPhysicalProperties = PhysicalProperties.new(0.7, 0.2, 0.5, 100, 100)
 				block.Velocity = rootu.CFrame:VectorToWorldSpace(Vector3.new(0, -70, -80))
-				block.RotVelocity = rootu.CFrame:VectorToWorldSpace(Vector3.new(5, 0, 0))
+				block.RotVelocity = rootu.CFrame:VectorToWorldSpace(Vector3.new(-5, 0, 0))
 				task.spawn(function()
 					local s = os.clock()
 					local lasthit = 0
 					repeat local dt = task.wait()
-						if block.Velocity.Magnitude > 5 then
-							Attack(block.Position, 5, true)
+						if block.Velocity.Magnitude > 8 then
+							Attack(block.Position, 3.5, true)
 							if os.clock() - lasthit > 0.08 then
 								local hit = PhysicsRaycast(block.Position, block.Velocity.Unit * 5)
 								if hit then
