@@ -322,11 +322,19 @@ do
 			task.wait()
 			local s, data = pcall(HttpService.JSONEncode, HttpService, SaveData)
 			if s then
-				savefailwarn = false
 				odata = odata or data
 				if odata ~= data then
-					odata = data
-					pcall(writefile, SaveDataFilename, data)
+					local s, err = pcall(writefile, SaveDataFilename, data)
+					if s then
+						savefailwarn = false
+						odata = data
+					else
+						if not savefailwarn then
+							Util.Notify("Failed to write tree.ehehetilde (your save file)")
+							savefailwarn = true
+						end
+					end
+					task.wait(5)
 				end
 			else
 				if not savefailwarn then
@@ -3641,9 +3649,7 @@ do
 								self.Zoom = (self.Zoom + zoomDelta) / (1 - zoomDelta * 0.5)
 							end
 						end
-						if self.Zoom < 0.5 then
-							self.Zoom = 0.5
-						end
+						self.Zoom = math.clamp(self.Zoom, 0.5, 100000)
 						self._Zoom = self.Zoom + (self._Zoom - self.Zoom) * math.exp(-32 * dt)
 						local currLookVector = suppliedLookVector or newCameraCFrame.LookVector
 						local currPitchAngle = math.asin(currLookVector.Y)
@@ -4614,6 +4620,7 @@ SaveData.Reanimator.HatsPatchmahub = not not SaveData.Reanimator.HatsPatchmahub
 SaveData.Reanimator.HatsFling = not not SaveData.Reanimator.HatsFling
 SaveData.Reanimator.HatsSpin = not not SaveData.Reanimator.HatsSpin
 SaveData.Reanimator.HatsFlingMethod = SaveData.Reanimator.HatsFlingMethod or 1
+SaveData.Reanimator.NoToolHolding = not not SaveData.Reanimator.NoToolHolding
 SaveData.Reanimator.HatsToolAnim = SaveData.Reanimator.HatsToolAnim or 0
 HatReanimator.HatCollide = SaveData.Reanimator.HatsCollide
 HatReanimator.HatCollideMethod = SaveData.Reanimator.HatsCollideMethod
@@ -4636,6 +4643,7 @@ HatReanimator.FlingMethod = SaveData.Reanimator.HatsFlingMethod
 -- 1 - use biggest collidable hat
 -- 2 - use all hats
 -- 3 - tool fling
+HatReanimator.ToolHolding = not SaveData.Reanimator.NoToolHolding
 HatReanimator.ToolAnimMethod = SaveData.Reanimator.HatsToolAnim
 -- 0 - nothing
 -- 1 - sword
@@ -4766,6 +4774,10 @@ function HatReanimator.Config(parent)
 	}, HatReanimator.FlingMethod + 2).Changed:Connect(function(val)
 		HatReanimator.FlingMethod = val - 2
 		SaveData.Reanimator.HatsFlingMethod = val - 2
+	end)
+	UI.CreateSwitch(parent, "Tool Holding", HatReanimator.ToolHolding).Changed:Connect(function(val)
+		HatReanimator.ToolHolding = val
+		SaveData.Reanimator.NoToolHolding = val
 	end)
 	UI.CreateDropdown(parent, "toolanim Method", {
 		"Disabled",
@@ -4985,7 +4997,6 @@ function HatReanimator.Start()
 
 	local BaseParts = {}
 	local CharTools = {}
-	local DelayedCharTools = {}
 	local CharHats = {}
 
 	local HatRefs = {}
@@ -5638,15 +5649,11 @@ function HatReanimator.Start()
 		elseif v:IsA("Tool") and v.Parent == Player.Character then
 			if not table.find(CharTools, v) then
 				table.insert(CharTools, v)
-				table.insert(DelayedCharTools, v)
 				local conn = nil
 				conn = v.AncestryChanged:Connect(function()
 					if v.Parent ~= Player.Character then
 						local i = table.find(CharTools, v)
 						if i then table.remove(CharTools, i) end
-						--task.wait(1)
-						local i = table.find(DelayedCharTools, v)
-						if i then table.remove(DelayedCharTools, i) end
 					end
 				end)
 			end
@@ -6023,11 +6030,10 @@ function HatReanimator.Start()
 		if HatReanimator.DontFireCharAddOnThisChar == character then return end
 		currentping = Player:GetNetworkPing()
 		local toolnames = {}
-		for _,v in DelayedCharTools do table.insert(toolnames, v.Name) end
+		for _,v in CharTools do table.insert(toolnames, v.Name) end
 		table.clear(BaseParts)
 		table.clear(CharHats)
 		table.clear(CharTools)
-		table.clear(DelayedCharTools)
 		ResetHatRefs()
 		character.DescendantAdded:Connect(CharOnDesc)
 		for _,v in character:GetDescendants() do
@@ -6257,7 +6263,8 @@ function HatReanimator.Start()
 						handle.RotVelocity = Vector3.new(0, 0, 0)
 					end
 				end))
-				handle:BreakJoints()
+				local w = handle:FindFirstChild("AccessoryWeld")
+				if w and w:IsA("Weld") then w:Destroy() end
 				handle:SetAttribute("_Uhhhhhh_HasCollide", false)
 			end
 		end
@@ -6461,7 +6468,11 @@ function HatReanimator.Start()
 					local handle = v:FindFirstChild("Handle")
 					if handle and handle:IsA("BasePart") then
 						handle.CanCollide = false
-						handlethese[handle] = rightarm.CFrame * rightgrip * v.Grip:Inverse()
+						if HatReanimator.ToolHolding then
+							handlethese[handle] = rightarm.CFrame * rightgrip * v.Grip:Inverse()
+						else
+							handlethese[handle] = RCRootPart.CFrame + Vector3.new(0, -12, 0)
+						end
 						if not IsNetworkOwner(handle) then
 							local a = Player:GetNetworkPing() + 0.2 + math.sin(t * 30) * 0.2
 							claimoverride = handle.CFrame
@@ -6484,7 +6495,7 @@ function HatReanimator.Start()
 					v.RequiresHandle = false
 					v.ManualActivationOnly = false
 				end
-				if #CharTools > 0 then
+				if #CharTools > 0 and HatReanimator.ToolHolding then
 					local FakeTool = ReanimCharacter:FindFirstChildOfClass("Tool")
 					if not FakeTool then
 						toolequipped = true
@@ -8390,7 +8401,7 @@ UI.CreateText(CreditsPage, "expose more backend functions for me like a good boy
 UI.CreateText(CreditsPage, "<b>rqz's Genesis FE</b>", 14, Enum.TextXAlignment.Center)
 UI.CreateText(CreditsPage, "ill be taking ALL your convertions >:D", 12, Enum.TextXAlignment.Center)
 UI.CreateText(CreditsPage, "actually, im just taking the names, search it up on script sources, read the source, convert it and stuff then done", 12, Enum.TextXAlignment.Center)
-UI.CreateText(CreditsPage, "<font color=\"#4444FF\"><b>Empyrean Reanimate (click for Discord)</b></font>", 12, Enum.TextXAlignment.Center).InputBegan:Connect(function(input)
+--[[UI.CreateText(CreditsPage, "<font color=\"#4444FF\"><b>Empyrean Reanimate (click for Discord)</b></font>", 12, Enum.TextXAlignment.Center).InputBegan:Connect(function(input)
 	if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
 		Util.Notify("Link copied!")
 		pcall(setclipboard, "https://discord.gg/UJ7YtqadPJ")
@@ -8409,7 +8420,8 @@ UI.CreateText(CreditsPage, "<font color=\"#4444FF\"><b>Empyrean Reanimate (click
 		})
 	end
 end)
-UI.CreateText(CreditsPage, "your tool fling is great reference!", 12, Enum.TextXAlignment.Center)
+UI.CreateText(CreditsPage, "your tool fling is great reference!", 12, Enum.TextXAlignment.Center)]]
+-- now it just takes 2 seconds to take ownership, sorry
 UI.CreateSeparator(CreditsPage)
 UI.CreateText(CreditsPage, "<b>* Greetings to *</b>", 15, Enum.TextXAlignment.Center)
 UI.CreateText(CreditsPage, "fev, inno, rqz, mry7zz, theo, redactedre, colon", 12, Enum.TextXAlignment.Center)
