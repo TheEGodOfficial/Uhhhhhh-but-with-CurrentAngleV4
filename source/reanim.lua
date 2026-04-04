@@ -6182,16 +6182,6 @@ function HatReanimator.Start()
 			-- Credits to Empyrean as reference for this snippet
 			for _,tool in tools do
 				tool.Parent = character
-				local handle = tool:FindFirstChild("Handle")
-				if handle and handle:IsA("BasePart") then
-					table.insert(bringconns, RunService.Heartbeat:Connect(function(dt)
-						if handle:IsDescendantOf(workspace) and IsNetworkOwner(handle) then
-							handle.CFrame = CFrame.new(claimarea) + Vector3.new(5, 0, 0)
-							handle.Velocity = Vector3.new(0, 67, 0)
-							handle.RotVelocity = Vector3.new(0, 0, 0)
-						end
-					end))
-				end
 			end
 			Humanoid:UnequipTools()
 		end
@@ -6316,16 +6306,10 @@ function HatReanimator.Start()
 		end
 		if backpack then
 			for _,tool in tools do
+				tool.Parent = Humanoid
 				tool.Parent = character
 			end
 			Humanoid:UnequipTools()
-			for _,tool in tools do
-				local i = table.find(toolnames, tool.Name)
-				if i then
-					table.remove(toolnames, i)
-					tool.Parent = character
-				end
-			end
 		end
 		lgloop:Disconnect()
 		if perma then task.wait(1) end
@@ -6354,6 +6338,16 @@ function HatReanimator.Start()
 		end
 		--pcall(function() Player.ReplicationFocus = nil end)
 		CurrentCharacter = character
+		task.wait()
+		if backpack then
+			for _,tool in tools do
+				local i = table.find(toolnames, tool.Name)
+				if i then
+					table.remove(toolnames, i)
+					tool.Parent = character
+				end
+			end
+		end
 	end
 
 	local CharConn = Player.CharacterAdded:Connect(OnCharacter)
