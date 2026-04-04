@@ -6022,6 +6022,8 @@ function HatReanimator.Start()
 			Camera.CFrame = camcfr
 		end)
 		currentping = Player:GetNetworkPing()
+		local toolnames = {}
+		for _,v in CharTools do table.insert(toolnames, v) end
 		table.clear(BaseParts)
 		table.clear(CharHats)
 		table.clear(CharTools)
@@ -6314,8 +6316,13 @@ function HatReanimator.Start()
 		if perma and backpack then
 			for _,tool in tools do
 				tool.Parent = character
+				local i = table.find(toolnames, tool.Name)
+				if i then
+					table.remove(toolnames, i)
+				else
+					tool.Parent = backpack
+				end
 			end
-			Humanoid:UnequipTools()
 		end
 		lgloop:Disconnect()
 		if perma then task.wait(1) end
@@ -6453,11 +6460,9 @@ function HatReanimator.Start()
 				for _,v in CharTools do
 					local handle = v:FindFirstChild("Handle")
 					if handle and handle:IsA("BasePart") then
+						handle.CanCollide = false
 						handlethese[handle] = rightarm.CFrame * rightgrip * v.Grip:Inverse()
-						if IsNetworkOwner(handle) then
-							handle.CanCollide = false
-						else
-							handle.CanCollide = true
+						if not IsNetworkOwner(handle) then
 							local a = Player:GetNetworkPing() + 0.2 + math.sin(t * 30) * 0.2
 							claimoverride = handle.CFrame
 							claimoverride += handle.Velocity * a
@@ -6571,7 +6576,7 @@ function HatReanimator.Start()
 				if t > letitgo then
 					flingtarget = HatReanimator.FlingTargets[1]
 					if flingtarget then
-						if not HatReanimator.HasPermadeath or HatReanimator.FlingMethod == 0 then
+						if --[[not HatReanimator.HasPermadeath or]] HatReanimator.FlingMethod == 0 then
 							Respawn()
 							flingtarget.Time = nil
 							flingtarget = nil
