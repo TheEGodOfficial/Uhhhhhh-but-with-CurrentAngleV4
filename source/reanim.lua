@@ -5644,7 +5644,7 @@ function HatReanimator.Start()
 					if v.Parent ~= Player.Character then
 						local i = table.find(CharTools, v)
 						if i then table.remove(CharTools, i) end
-						task.wait(1)
+						--task.wait(1)
 						local i = table.find(DelayedCharTools, v)
 						if i then table.remove(DelayedCharTools, i) end
 					end
@@ -6021,14 +6021,9 @@ function HatReanimator.Start()
 	local NumHats = 0
 	local function OnCharacter(character)
 		if HatReanimator.DontFireCharAddOnThisChar == character then return end
-		local camcfr = Camera.CFrame
-		RunService.PreRender:Once(function()
-			RunService.PreAnimation:Wait()
-			Camera.CFrame = camcfr
-		end)
 		currentping = Player:GetNetworkPing()
 		local toolnames = {}
-		for _,v in DelayedCharTools do table.insert(toolnames, v.Name) end
+		for _,v in DelayedCharTools do print(v.Name) table.insert(toolnames, v.Name) end
 		table.clear(BaseParts)
 		table.clear(CharHats)
 		table.clear(CharTools)
@@ -6183,7 +6178,7 @@ function HatReanimator.Start()
 		if perma then task.wait(1) end
 		local backpack = Player:FindFirstChildOfClass("Backpack")
 		local tools = GetTools()
-		if perma and backpack then
+		if backpack then
 			-- Credits to Empyrean as reference for this snippet
 			for _,tool in tools do
 				tool.Parent = character
@@ -6319,7 +6314,7 @@ function HatReanimator.Start()
 			repeat task.wait() until stateunlocked or not character:IsDescendantOf(workspace)
 			task.wait(0.25)
 		end
-		if perma and backpack then
+		if backpack then
 			for _,tool in tools do
 				tool.Parent = character
 			end
