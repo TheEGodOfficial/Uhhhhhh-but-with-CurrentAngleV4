@@ -4226,52 +4226,62 @@ function LimbReanimator.Start()
 	end
 
 	local chrcon = Player.CharacterAdded:Connect(function(chr)
-		if spawndb == false then
-			spawndb = true
-			--// Check configdoc.md for settings documentation
+		local enabled = false
+		task.spawn(function()
+			if spawndb == false then
+				spawndb = true
+				--// Check configdoc.md for settings documentation
 
-			--// Below are the settings
-			-- SETTINGS --
-			local oldsettings = settings --// This is a default Roblox function, to prevent it from breaking we replace it with the function again at the end
-			local settings = _G
-
-			settings["Use default animations"] = true
-			settings["Local character transparency level"] = 1
-			settings["Disable character scripts"] = true
-			settings["Fake character should collide"] = true
-			settings["Parent real character to fake character"] = false
-			settings["Respawn character"] = true
-			--//settings["Instant respawn"] = false // Patched by roblox
-			settings["Hide HumanoidRootPart"] = LimbReanimator.RootPartHidden
-			settings["PermaDeath fake character"] = true
-			settings["R15 Reanimate"] = false
-			settings["Click Fling"] = LimbReanimator.FlingEnabled
-			settings["Anti-Fling"] = true
-			settings["Hide RootPart Distance"] = CFrame.new(255, 255, 0)
-			settings["Allow tool equipping"] = true --// Placeholder
-			if LimbReanimator.ReplicateFPS10 == true then
-				settings["Client sided display mode"] = 2 --// If you will see the fake character, or the real character, 1 = real character (default), 2 = fake character
-			else
-				settings["Client sided display mode"] = 1
-			end
-			settings["Fallback prompt"] = false --// Enable or disable the annoying fallback prompt if your game is not whitelisted
-			settings["Respawn mode"] = "Health"
-
-			settings["Names to exclude from transparency"] = {
-			    --[[ example:
-			    ["HumanoidRootPart"] = true,
-			    ["Left Arm"] = true
-			    ]]
-			}
-			--// Settings end
+				--// Below are the settings
+				-- SETTINGS --
+				local oldsettings = settings --// This is a default Roblox function, to prevent it from breaking we replace it with the function again at the end
+				local settings = _G
 	
-			settings = oldsettings
+				settings["Use default animations"] = true
+				settings["Local character transparency level"] = 1
+				settings["Disable character scripts"] = true
+				settings["Fake character should collide"] = true
+				settings["Parent real character to fake character"] = false
+				settings["Respawn character"] = true
+				--//settings["Instant respawn"] = false // Patched by roblox
+				settings["Hide HumanoidRootPart"] = LimbReanimator.RootPartHidden
+				settings["PermaDeath fake character"] = false
+				settings["R15 Reanimate"] = false
+				settings["Click Fling"] = LimbReanimator.FlingEnabled
+				settings["Anti-Fling"] = true
+				settings["Hide RootPart Distance"] = CFrame.new(255, 255, 0)
+				settings["Allow tool equipping"] = true --// Placeholder
+				if LimbReanimator.ReplicateFPS10 == true then
+					settings["Client sided display mode"] = 2 --// If you will see the fake character, or the real character, 1 = real character (default), 2 = fake character
+				else
+					settings["Client sided display mode"] = 1
+				end
+				settings["Fallback prompt"] = false --// Enable or disable the annoying fallback prompt if your game is not whitelisted
+				settings["Respawn mode"] = "Health"
 
-			task.spawn(function()
-				loadstring(game:HttpGet("https://raw.githubusercontent.com/somethingsimade/CurrentAngleV4/refs/heads/main/v4.lua"))()
-			end)
-			task.wait(Players.RespawnTime+Players.RespawnTime+2)
-			spawndb = false
+				settings["Names to exclude from transparency"] = {
+				    --[[ example:
+				    ["HumanoidRootPart"] = true,
+				    ["Left Arm"] = true
+				    ]]
+				}
+				--// Settings end
+		
+				settings = oldsettings
+	
+				task.spawn(function()
+					loadstring(game:HttpGet("https://raw.githubusercontent.com/somethingsimade/CurrentAngleV4/refs/heads/main/v4.lua"))()
+				end)
+				enabled = true
+	
+				task.wait(Players.RespawnTime+Players.RespawnTime+2)
+				spawndb = false
+			end
+		end)
+		if enabled == true then
+			Reanimate.Character = Player.Character
+			_G_Uhhhhhh.Character = Player.Character
+			enabled = false
 		end
 	end)
 
@@ -4290,7 +4300,7 @@ function LimbReanimator.Start()
 	settings["Respawn character"] = true
 	--//settings["Instant respawn"] = false // Patched by roblox
 	settings["Hide HumanoidRootPart"] = LimbReanimator.RootPartHidden
-	settings["PermaDeath fake character"] = true
+	settings["PermaDeath fake character"] = false
 	settings["R15 Reanimate"] = false
 	settings["Click Fling"] = LimbReanimator.FlingEnabled
 	settings["Anti-Fling"] = true
