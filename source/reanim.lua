@@ -4333,14 +4333,66 @@ function LimbReanimator.Start()
 	Player.CharacterAdded:Wait()
 
 	task.spawn(function()
-		task.wait(Players.RespawnTime+2)
+		Reanimate.Character = Player.Character
+		_G_Uhhhhhh.Character = Player.Character
 	end)
 
 	Reanimate.Starting = false
 
 	while not Reanimate.Stopping do
-		RunService.PreSimulation:Wait()
-	end
+		local ReanimCharacter = Reanimate.Character
+
+		local LimbMapping = loadstring(readfile("UhhhhhhReanim/BuiltinModules/d_limbmap.lua"))()
+		
+		if ReanimCharacter then
+			local RCHumanoid = ReanimCharacter:FindFirstChildOfClass("Humanoid")
+			local RCRootPart = ReanimCharacter:FindFirstChild("HumanoidRootPart")
+			local RCTorso = ReanimCharacter:FindFirstChild("Torso")
+			if Character and Humanoid and RootPart then
+					RunService.Heartbeat:Wait()
+					for _,v in UnknownMotor6Ds do
+						Util.SetMotor6DTransform(v, CFrame.identity)
+					end
+					for _,map in LimbMapping do
+						local v = map.Reference
+						if v then
+							if flingtarget then
+								Util.SetMotor6DTransform(v, CFrame.identity)
+							else
+								local cf = CFrame.identity
+								local p0, p1 = ReanimCharacter:FindFirstChild(map.RPart0), ReanimCharacter:FindFirstChild(map.RPart1)
+								if map.RPart0 == "ROOT" then
+									p0 = RootPart
+								end
+								if p0 and p1 then
+									if map.Type == 1 then
+										cf = p0.CFrame:ToObjectSpace(p1.CFrame)
+									end
+									if map.Type == 2 then
+										local transform = map.C0:Inverse() * p0.CFrame:ToObjectSpace(p1.CFrame) * map.C1
+										transform = map.Offset * transform.Rotation * map.Offset:Inverse() + transform.Position
+										cf = CFrame.new(v.C0.Position) * transform * CFrame.new(-v.C1.Position)
+									end
+								end
+								if not map.CFrame then
+									map.CFrame = cf
+								end
+								Util.SetMotor6DOffset(v, map.CFrame)
+							end
+						end
+					end
+					if Reanimate:ShouldRotationType() then
+						RunService.PreRender:Wait()
+						local ocf = RCRootPart.CFrame
+						local ax, ay, az = Camera.CFrame:ToEulerAngles(Enum.RotationOrder.YXZ)
+						local bx, by, bz = ocf:ToEulerAngles(Enum.RotationOrder.YXZ)
+						local tcf = CFrame.fromEulerAngles(bx, ay, bz, Enum.RotationOrder.YXZ) + ocf.Position
+						RootPart.CFrame = tcf:ToWorldSpace(ocf:ToObjectSpace(RootPart.CFrame))
+						RCRootPart.CFrame = tcf
+					end
+				end
+			end
+		end
 
 	chrcon:Disconnect()
 	chrcon = nil
