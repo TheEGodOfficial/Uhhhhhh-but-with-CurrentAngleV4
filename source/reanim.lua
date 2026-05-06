@@ -36,6 +36,7 @@ local TweenService = cloneref(game:GetService("TweenService"))
 local TextChatService = cloneref(game:GetService("TextChatService"))
 local UserInputService = cloneref(game:GetService("UserInputService"))
 local ContextActionService = cloneref(game:GetService("ContextActionService"))
+local Workspace = cloneref(game:GetService("Workspace"))
 
 local Util = {}
 
@@ -4489,6 +4490,170 @@ function LimbReanimator.Config(parent)
 	end))
 end
 function LimbReanimator.Start()
+local gameIndex
+local gameNewIndex
+local CFrameIndex
+local CFrameMul
+local CFrameAdd
+local Vector3Mul
+
+local emptyCFrame = CFrame.new()
+
+local getrawmetatableworks = false
+local isindexsupported = false
+
+if getrawmetatable then
+	local s, r = pcall(getrawmetatable, game)
+	local success, res = pcall(getrawmetatable, emptyCFrame)
+
+	if s then  
+		if r.__index then
+			gameIndex = r.__index
+			gameNewIndex = r.__newindex
+			getrawmetatableworks = true
+		end
+	end
+	if success and s then
+		if res.__index then
+			CFrameIndex = res.__index
+			CFrameMul = res.__mul
+			CFrameAdd = res.__add
+			Vector3Mul = getrawmetatable(vector3zero).__mul
+		end
+	end
+end
+
+if not getrawmetatableworks then
+	xpcall(function()
+		return game[{}]
+	end, function()
+		gameIndex = debug_info(2, "f")
+	end)
+
+	xpcall(function()
+		game[{}] = {}
+	end, function()
+		gameNewIndex = debug_info(2, "f")
+	end)
+
+	xpcall(function()
+		return emptyCFrame[{}]
+	end, function()
+		CFrameIndex = debug_info(2, "f")
+	end)
+
+	xpcall(function()
+		return emptyCFrame * 9
+	end, function()
+		CFrameMul = debug_info(2, "f")
+	end)
+
+	xpcall(function()
+		return emptyCFrame + 9
+	end, function()
+		CFrameAdd = debug_info(2, "f")
+	end)
+
+	xpcall(function()
+		return vector3zero * 9
+	end, function()
+		Vector3Mul = debug_info(2, "f")
+	end)
+end
+
+
+local successtest, err = pcall(function()
+	return gameIndex(Workspace, "Parent")
+end)
+
+if not successtest then
+	if string.find(err:lower(), "instance expected") then
+		isindexsupported = false
+	else
+		isindexsupported = true
+	end
+else
+	isindexsupported = true
+end
+
+if not gameIndex then
+	gameIndex = function(self, key)
+		return self[key]
+	end
+end
+
+if not gameNewIndex then
+	gameNewIndex = function(self, key, new)
+		self[key] = new
+	end
+end
+
+if not CFrameIndex then
+	CFrameIndex = function(self, key, new)
+		self[key] = new
+	end
+end
+
+if not CFrameMul then
+	CFrameMul = function(a, b)
+		return a * b
+	end
+end
+
+if not CFrameAdd then
+	CFrameAdd = function(a, b)
+		return a + b
+	end
+end
+
+if not Vector3Mul then
+	Vector3Mul = function(a, b)
+		return a * b
+	end
+end
+
+local dummypart = Instance.new("Part")
+
+local GetDescendants = dummypart.GetDescendants
+local IsA = dummypart.IsA
+local Destroy = dummypart.Destroy
+
+local function removeAnims(character)
+	local humanoid = character:WaitForChild("Humanoid", 5)
+	local animator = humanoid:FindFirstChildWhichIsA("Animator")
+	if animator then
+		Destroy(animator)
+	end
+	if not Reanimate.UseLoadAnimationHook then
+		local animateScript = character:FindFirstChild("Animate")
+		if animateScript then
+			Destroy(animateScript)
+		end
+	end
+	local a = nil
+	a = humanoid.DescendantAdded:Connect(function(child)
+		if child:IsA("Animator") then
+			Destroy(child)
+			a:Disconnect()
+			a = nil
+		end
+	end)
+end
+
+local Inverse = emptyCFrame.Inverse
+local ToAxisAngle = emptyCFrame.ToAxisAngle
+local ToObjectSpace = emptyCFrame.ToObjectSpace
+local ToEulerAnglesXYZ = emptyCFrame.ToEulerAnglesXYZ
+
+local function RCA6dToCFrame(Motor6D, TargetPartCF, ReferencePartCF)
+	local rel = CFrameMul(Inverse(ReferencePartCF), TargetPartCF)
+	local delta = CFrameMul(CFrameMul(Inverse(gameIndex(Motor6D, "C0")), rel), gameIndex(Motor6D, "C1"))
+	local axis, angle = ToAxisAngle(delta)
+	local newangle = Vector3Mul(axis, angle)
+	sethiddenproperty(Motor6D, 'ReplicateCurrentOffset6D', CFrameIndex(delta, "Position"))
+	sethiddenproperty(Motor6D, 'ReplicateCurrentAngle6D', newangle)
+end
+
 	local LimbNames = {"Head", "Torso", "Left Arm", "Right Arm", "Left Leg", "Right Leg"}
 	local rootposition = Vector3.new(
 		math.random(-65536, 65536),
@@ -4640,19 +4805,7 @@ function LimbReanimator.Start()
 		for _,v in character:GetDescendants() do
 			task.spawn(CharOnDesc, v)
 		end
-		local humanoid = character:WaitForChild("Humanoid", 5)
-		local stupid = humanoid:FindFirstChildWhichIsA("Animator")
-		if stupid then
-			stupid:Destroy()
-		end
-		if not Reanimate.UseLoadAnimationHook then
-			stupid = character:FindFirstChild("Animate")
-			while not stupid do
-				character.ChildAdded:Wait()
-				stupid = character:FindFirstChild("Animate")
-			end
-			stupid:Destroy()
-		end
+		removeAnims(character)
 	end)
 	Player.CharacterAdded:Wait()
 	Reanimate.CreateCharacter(InitCFrame)
