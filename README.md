@@ -1,3 +1,5 @@
+# DISCONTINUED SINCE I FOUND OUT THEY BASICALLY USE THE SAME METHODS BUT ONE SUPPORTS MORE GAMES
+
 # <p align="center">STEVETHEREALONE (@steve_internal)'s Universal Hierarchical 6 Reanimator</p>
 <p align="center">A really cool, optimised animation program with demo scenes! Idea originated from a dream.</p>
 <p align="center">
